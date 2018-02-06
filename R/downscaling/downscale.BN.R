@@ -1,4 +1,5 @@
 source("R/downscaling/aux/predict.DBN.R")
+source("R/downscaling/aux/is.mostLikely.R")
 
 downscale.BN <- function(downscaling.bn, x,
                          prediction.type = "probabilities", event = "1", threshold.vector = NULL,
@@ -27,7 +28,7 @@ downscale.BN <- function(downscaling.bn, x,
 
 
   if (is.null(junction)){
-    print("Junction was not compiled in training stage. Compiling junction...")
+    print("Junction was not compiled at training stage. Compiling junction...")
     junction <- compile( as.grain(BN.fit) )
     print("Done.")
   }
