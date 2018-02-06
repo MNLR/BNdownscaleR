@@ -105,7 +105,6 @@ build.downscalingBN <- function(data,
   if ( two.step ){
     print("Injecting Globals into Bayesian Network...")
     whitelist <- bn$arcs
-    print(whitelist)
 
     if (is.null(bnlearning.algorithm2) ){ bnlearning.algorithm2 <- bnlearning.algorithm }
 
@@ -119,6 +118,7 @@ build.downscalingBN <- function(data,
                                 bnlearning.args.list = bnlearning.args.list2,
                                 parallelize = parallelize, n.cores= n.cores, cluster.type = cluster.type,
                                 output.marginals = output.marginals,
+                                compile.junction = compile.junction,
                                 param.learning.method = param.learning.method,
                                 two.step = FALSE)
     if (return.first){
