@@ -1,19 +1,7 @@
 #####################################################
 library(loadeR)                                     #
-library(downscaleR)                                 #
-library(transformeR)                                #
-library(bnlearn)                                    #
-library(gRain)                                      #
-library(igraph)                                     #
-library(shape)                                      #
-library(flexclust)                                  #
-library(parallel)                                   #
-library(sfsmisc)                                    #
-
 #####################################################
 loginUDG('Mitor', '450cacahuetes')                  #
-source("R/downscaling/build.downscalingBN.R")       #
-source("R/downscaling/downscale.BN.R")              #
 #####################################################
 
 ### datasets
@@ -33,36 +21,70 @@ y$Data[y$Data < 1] <- 0
 x$Data[x$Data >= 1] <- 1
 x$Data[x$Data < 1] <- 0
 
+# Traslado de grid
+
+x <- interpGrid(x, new.coordinates = list(x = x$xyCoords$x, y = x$xyCoords$y + 0.25), method = "nearest")
+
 ###########
 ###########
 #x <- getTemporalIntersection(obs = y, prd = x, which.return = "prd")
 #y <- getTemporalIntersection(obs = y, prd = x, which.return = "obs")
-
 grid <- prepare_predictors(x = x,y = y)
 data <- prepare_predictors.forBN(grid = grid, rm.na = TRUE, rm.na.mode = "observations")
+
 dbn <- build.downscalingBN(data,
-                           forbid.global.arcs = FALSE, forbid.local.arcs = FALSE,
-                           bnlearning.algorithm = "hc",
-                           bnlearning.args.list = list(),
-                           param.learning.method = "mle",
+                           forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
+                           bnlearning.algorithm = "gs",
+                           #bnlearning.args.list = list(distance = 0.5),
+                           param.learning.method = "bayes",
                            output.marginals = TRUE,
-                           compile.junction = FALSE,
+                           compile.junction = TRUE,
                            parallelize = TRUE, n.cores= NULL, cluster.type = "PSOCK",
-                           two.step = FALSE,
+                           two.step = TRUE,
                            return.first = FALSE,
-                           bnlearning.algorithm2 = "hc",
-                           bnlearning.args.list2 = list()
+                           bnlearning.algorithm2 = "hc.local",
+                           bnlearning.args.list2 = list(distance = 0.5)
                            )
 
 plot.DBN(dbn, dev = TRUE)
 
-tx <- subsetGrid(x, years = c(1991))
+years <- c(1991, 1992)
+tx <- subsetGrid(x, years = years)
+
+tx <- getTemporalIntersection(obs = y, prd = x, which.return = "prd")
+ty <- getTemporalIntersection(obs = y, prd = x, which.return = "obs")
+
+tindex <- complete.cases(ty$Data)
+ty$Data <- ty$Data[tindex, ]
+grid$x.global <- grid$x.global[tindex, ]
+tx$Data <- tx$Data[tindex, , ] #time lat lon
+
+
 test <- prepare_newdata(newdata = tx,
                 predictor = grid)
 
-ty <- downscale.BN(dbn, x = test,
-                        prediction.type = "event", event = "1", threshold.vector = NULL,
+py <- downscale.BN(dbn, x = test,
+                        prediction.type = "probabilities", #event = "1", threshold.vector = NULL,
                         parallelize = TRUE, n.cores = NULL , cluster.type = "FORK")
 
+comparablesy <- py$member_1[tindex,,]
+comparablesy <- subsetGrid(y, years = years)
+
+c.table(predicted = y$member_1, real = y$Data)
+auc.DBN(downscaled = py$member_1, realData = comparablesy$Data, plot.curves = TRUE)
+
+
+
+
+#######################
+#######################
+#######################   CV
+#######################
+#######################
+
+ix <- getTemporalIntersection(obs = y, prd = x, which.return = "prd")
+iy <- getTemporalIntersection(obs = y, prd = x, which.return = "obs")
+
+dS <- dataSplit(ix, iy, f = 3/4, type = "random")
 
 

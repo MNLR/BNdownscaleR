@@ -1,5 +1,3 @@
-source("R/local.bnlearning/aux/build.distanceBlacklist.R")
-
 add.toBlacklist <- function(nodes, bnlearning.args.list){
   if ( !(is.null(bnlearning.args.list$debug)) ){debug <- bnlearning.args.list$debug} else {debug <- FALSE}
   global.restrictions <- build.distanceBlacklist(names = nodes,

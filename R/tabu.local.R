@@ -1,8 +1,11 @@
-source("R/local.bnlearning/aux/build.distanceBlacklist.R")
+tabu.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE, start = NULL, whitelist = NULL,
+                        blacklist = NULL, score = NULL, ..., debug = FALSE, tabu = 10, max.tabu = tabu, max.iter = Inf,
+                        maxp = Inf, optimized = TRUE ) {
 
-rsmax2.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE, whitelist = NULL, blacklist = NULL, restrict = "gs", maximize = "hc",
-                         test = NULL, score = NULL, alpha = 0.05, B = NULL, ...,
-                         maximize.args = list(), optimized = TRUE, strict = FALSE, debug = FALSE){
+  #
+  # Learns the structure of a Bayesian network using a tabu search algorithm algorithm and restricts the search for directed arcs to nodes that are closer than the distance specified generating
+  # a blacklist argument for tabu() function. The blacklist can be checked using output learnt.local$learning$blacklist.
+  #
   #  ---- INPUT:
   # x                 a data frame containing the variables of the model
   # positions         sorted array of the locations of x, can be N dimensional, must contain the same number of columns as the number of variables in x, and number of rows is the dimension.
@@ -13,9 +16,10 @@ rsmax2.local <- function(x, positions, distance, norm = "2", exceptions = NULL, 
   #
   #  ---- OUTPUT:
   #             object of class bn from bnlearn library.
+
   blacklist <- build.distanceBlacklist( colnames(x), positions, distance, exceptions = exceptions, blacklist = blacklist,
                                         norm = norm, plotrestrictions = plotrestrictions, debug = debug)
-  return( rsmax2(x = x, whitelist = whitelist, blacklist = blacklist, restrict = restrict , maximize = maximize,
-                 test = test, score = score, alpha = alpha, B = B, ...,
-                 maximize.args = maximize.args, optimized = optimized, strict = strict, debug = debug) )
-}
+
+  return( tabu(x, start = start, whitelist = whitelist, blacklist = blacklist, score = score, ... , debug = debug, tabu = tabu,
+               max.tabu = max.tabu, max.iter = max.iter, maxp = maxp, optimized = optimized) )
+  }

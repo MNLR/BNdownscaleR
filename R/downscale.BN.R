@@ -1,8 +1,6 @@
-source("R/downscaling/aux/predict.DBN.R")
-source("R/downscaling/aux/is.mostLikely.R")
-
 downscale.BN <- function(downscaling.bn, x,
                          prediction.type = "probabilities", event = "1", threshold.vector = NULL,
+                         output.attr.evidence = FALSE,
                          parallelize = FALSE, n.cores = NULL , cluster.type = "PSOCK"){
 
   # Parallelize = TRUE should reduce computation times significantly when lots of evidences are provided.
@@ -25,7 +23,6 @@ downscale.BN <- function(downscaling.bn, x,
   junction <- downscaling.bn$junction
   predictors <- names(BN$nodes)[1:Nglobal]
   predictands <- names(BN$nodes)[- (1:Nglobal) ]
-
 
   if (is.null(junction)){
     print("Junction was not compiled at training stage. Compiling junction...")
@@ -80,28 +77,3 @@ downscale.BN <- function(downscaling.bn, x,
           )
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

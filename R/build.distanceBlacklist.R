@@ -1,5 +1,3 @@
-source("R/local.bnlearning/aux/learning.complement2.R")
-
 build.distanceBlacklist <- function(names, positions, distance, exceptions = NULL, blacklist = NULL, norm = "2",
                                     plotrestrictions = FALSE, debug = FALSE) {
 

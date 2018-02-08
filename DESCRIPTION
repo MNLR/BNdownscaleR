@@ -1,11 +1,24 @@
 Package: BNdownscaleR
+Depends:
+    R(>= 3.1.0),
+    bnlearn,
+    downscaleR,
+    gRain,
+    sfsmisc,
+    parallel
+Imports:
+    igraph,
+    shape,
+Suggests:
+    loadeR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Statistical Downscaling with Bayesian Networks.
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Mikel Legasa <legasam@unican.es>
+BugReports: https://github.com/MNLR/BNdownscaleR/issues
+URL: https://github.com/MNLR/BNdownscaleR
+Maintainer: Mikel Legasa <legasam@unican.es>
+Description: This package applies Discrete Bayesian Networks to the problem of Statistical Downscaling.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

@@ -1,9 +1,7 @@
-source("R/local.bnlearning/aux/build.distanceBlacklist.R")
-
-fast.iamb.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE,
-                       cluster = NULL, whitelist = NULL, blacklist = NULL, test = NULL,
-                       alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, strict = FALSE,
-                       undirected = FALSE ){
+gs.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE,
+                     cluster = NULL, whitelist = NULL, blacklist = NULL, test = NULL,
+                     alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, strict = FALSE,
+                     undirected = FALSE ){
   #  ---- INPUT:
   # x                 a data frame containing the variables of the model
   # positions         sorted array of the locations of x, can be N dimensional, must contain the same number of columns as the number of variables in x, and number of rows is the dimension.
@@ -16,8 +14,7 @@ fast.iamb.local <- function(x, positions, distance, norm = "2", exceptions = NUL
   #             object of class bn from bnlearn library.
   blacklist <- build.distanceBlacklist( colnames(x), positions, distance, exceptions = exceptions, blacklist = blacklist,
                                         norm = norm, plotrestrictions = plotrestrictions, debug = debug)
-
-  return( fast.iamb(x = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist, test = test,
-               alpha = alpha, B = B, debug = debug, optimized = optimized, strict = strict,
-               undirected = undirected) )
+  return( gs(x = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist, test = test,
+             alpha = alpha, B = B, debug = debug, optimized = optimized, strict = strict,
+             undirected = undirected) )
 }

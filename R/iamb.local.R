@@ -1,5 +1,3 @@
-source("R/local.bnlearning/aux/build.distanceBlacklist.R")
-
 iamb.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE,
                      cluster = NULL, whitelist = NULL, blacklist = NULL, test = NULL,
                      alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, strict = FALSE,

@@ -1,13 +1,7 @@
-source("R/local.bnlearning/aux/build.distanceBlacklist.R")
-
-tabu.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE, start = NULL, whitelist = NULL,
-                        blacklist = NULL, score = NULL, ..., debug = FALSE, tabu = 10, max.tabu = tabu, max.iter = Inf,
-                        maxp = Inf, optimized = TRUE ) {
-
-  #
-  # Learns the structure of a Bayesian network using a tabu search algorithm algorithm and restricts the search for directed arcs to nodes that are closer than the distance specified generating
-  # a blacklist argument for tabu() function. The blacklist can be checked using output learnt.local$learning$blacklist.
-  #
+inter.iamb.local <- function(x, positions, distance, norm = "2", exceptions = NULL, plotrestrictions = FALSE,
+                       cluster = NULL, whitelist = NULL, blacklist = NULL, test = NULL,
+                       alpha = 0.05, B = NULL, debug = FALSE, optimized = TRUE, strict = FALSE,
+                       undirected = FALSE ){
   #  ---- INPUT:
   # x                 a data frame containing the variables of the model
   # positions         sorted array of the locations of x, can be N dimensional, must contain the same number of columns as the number of variables in x, and number of rows is the dimension.
@@ -18,10 +12,10 @@ tabu.local <- function(x, positions, distance, norm = "2", exceptions = NULL, pl
   #
   #  ---- OUTPUT:
   #             object of class bn from bnlearn library.
-
   blacklist <- build.distanceBlacklist( colnames(x), positions, distance, exceptions = exceptions, blacklist = blacklist,
                                         norm = norm, plotrestrictions = plotrestrictions, debug = debug)
 
-  return( tabu(x, start = start, whitelist = whitelist, blacklist = blacklist, score = score, ... , debug = debug, tabu = tabu,
-               max.tabu = max.tabu, max.iter = max.iter, maxp = maxp, optimized = optimized) )
-  }
+  return( inter.iamb(x = x, cluster = cluster, whitelist = whitelist, blacklist = blacklist, test = test,
+               alpha = alpha, B = B, debug = debug, optimized = optimized, strict = strict,
+               undirected = undirected) )
+}
