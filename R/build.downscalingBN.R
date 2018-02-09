@@ -26,7 +26,7 @@
 #' \code{prediction.type = "probabilities"} in  downscale.BN().
 #' @param compile.junction Compile the junction from BN.fit to compute probabilities. Can be set to FALSE,
 #' in which case it will be computed at the training stage.
-#' @param parallelize Set to \code{TRUE} for parallelization. Refer to the \code{\link[parallel]{parallel}}
+#' @param parallelize Set to \code{TRUE} for parallelization. Refer to the \code{\link[parallel]{parallel}} and see \code{Details}.
 #' @param n.cores When \code{parallelize = TRUE}, number of threads to be used, will use detectCores()-1 if not set.
 #' @param cluster.type Either "PSOCK" or "FORK". Use the former under Windows systems, refer to \code{\link[parallel]{parallel}}
 #' package.
@@ -63,19 +63,9 @@
 #'
 #'
 #'
-#' If there are still doubts about the optional parameters despite the description here, we encourage to look for further details in the atomic functions:
-#' \code{\link[downscaleR]{analogs.train}}, \code{\link[downscaleR]{glm.train}} and \code{\link[deepnet]{nn.train}}.
-#'
-#' @return A list of objects that contains the prediction on the train dataset and the model.
-#' \itemize{
-#'    \item \code{pred}: An object with the same structure as the predictands input parameter, but with pred$Data being the predictions and not the observations.
-#'    \item \code{model}: A list with the information of the model: method, coefficients, fitting ...
-#'    }
-#'
-#' @author Mikel Legasa
+#' @return An object of type DBN, which contains, in particular, the Bayesian Network.
+#' @author MN Legasa
 #' @export
-#' @importFrom MASS ginv
-#' @import deepnet
 #' @examples
 #' # Loading predictors
 
@@ -127,20 +117,17 @@ build.downscalingBN <- function(data,
   if ( (alg == "gs") | (alg == "iamb") | (alg == "fast")  | (alg == "inter") | (alg == "inter") ) { # Constraint based, parallelizable
     cl <- NULL
     if ( parallelize ) { # constraint-based algorithms allow parallelization
-      if ( is.null(n.cores) ){
-        n.cores <- floor(detectCores()-1)
-      }
-      # Initiate cluster
-      cl <- makeCluster(n.cores, type = cluster.type )
+      print("hello")
+      cl <- parallel.starter(cluster.type, n.cores)
       structure.learning.args.list[["cluster"]] <- cl
     }
     bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )
-    if (!(is.null(cl))) {stopCluster(cl)}
+    if (!(is.null(cl))) {stopCluster(cl)} # Stops parallel cluster
   }
   else if ( (alg == "mmhc") | (alg == "rsmax2") ) { bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )} # Non parallelizable, need cextend arc direction
   else { bn <-  do.call(structure.learning.algorithm, structure.learning.args.list) } # Non parallelizable, already DAG (directed)
   if (!two.step){ bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method) }
-  print("Done.")
+  print("Done building Bayesian Network.")
 
   if ( two.step ){
     print("Injecting Globals into Bayesian Network...")

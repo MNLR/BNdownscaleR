@@ -1,24 +1,25 @@
-Package: BNdownscaleR
+Package: downscaleR.BN
 Depends:
     R(>= 3.1.0),
     bnlearn,
     downscaleR,
     gRain,
     sfsmisc,
-    parallel
 Imports:
     igraph,
     shape,
+    parallel
 Suggests:
     loadeR
 Type: Package
 Title: Statistical Downscaling with Bayesian Networks.
 Version: 0.1.0
 Author: Mikel Legasa <legasam@unican.es>
-BugReports: https://github.com/MNLR/BNdownscaleR/issues
-URL: https://github.com/MNLR/BNdownscaleR
+BugReports: https://github.com/MNLR/downscaleR.BN/issues
+URL: https://github.com/MNLR/downscaleR.BN
 Maintainer: Mikel Legasa <legasam@unican.es>
 Description: This package applies Discrete Bayesian Networks to the problem of Statistical Downscaling.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
