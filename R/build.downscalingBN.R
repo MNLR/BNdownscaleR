@@ -117,7 +117,6 @@ build.downscalingBN <- function(data,
   if ( (alg == "gs") | (alg == "iamb") | (alg == "fast")  | (alg == "inter") | (alg == "inter") ) { # Constraint based, parallelizable
     cl <- NULL
     if ( parallelize ) { # constraint-based algorithms allow parallelization
-      print("hello")
       cl <- parallel.starter(cluster.type, n.cores)
       structure.learning.args.list[["cluster"]] <- cl
     }
