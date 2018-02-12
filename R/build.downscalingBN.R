@@ -75,6 +75,8 @@ build.downscalingBN <- function(data,
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
                                 forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
+                                dinamic = FALSE,
+                                epochs = 2, forbid.backwards = FALSE, forbid.dinamic.GD = TRUE, forbid.dinamic.global.arcs = TRUE,
                                 two.step = FALSE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
@@ -86,6 +88,13 @@ build.downscalingBN <- function(data,
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
 
+  if (dinamic & epochs >= 2) {
+    data <- prepareDataDinamicBN(data, epochs)
+    if (forbid.dinamic.global.arcs) {
+
+    }
+  }
+
   POS <- data$positions
   NX <- data$nx
   NY <- data$ny
@@ -96,11 +105,11 @@ build.downscalingBN <- function(data,
   }
   else{
     if (forbid.global.arcs){
-      globalNodeNames <- colnames(POS[ , 1:NX ])
+      globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
     }
     if (forbid.local.arcs){
-      localNodeNames <- colnames(POS[ , (NX+1):(NX+NY)])
+      localNodeNames <- data$y.names
       structure.learning.args.list <- add.toBlacklist(localNodeNames, structure.learning.args.list)
     }
     DATA <- data$data

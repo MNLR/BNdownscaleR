@@ -45,5 +45,5 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
   data[] <- lapply( data, factor) # the "[]" keeps the dataframe structure
   col_names <- names(data)
 
-  return( list(data = data, positions = positions, nx = nx, ny = ny, NAS = NAS ) )
+  return( list(data = data, positions = positions, x.names = x.names, nx = nx, y.names = y.names, ny = ny, NAS = NAS ) )
 }
