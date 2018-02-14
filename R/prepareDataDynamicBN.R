@@ -1,5 +1,14 @@
+#' prepareDataDinamicBN()
+#' @title
+#' @description
+#' @param data Expects output from \code{\link[downscaleR.BN]{prepare_predictors.forBN()}}.
+#' @details
+#' @return
+#' @author MN Legasa
+#' @export
+#' @examples
 
-prepareDataDinamicBN <- function(data, epochs){
+prepareDataDynamicBN <- function(data, epochs){
 
   # Data conversion
   dinamic.data <- data$data[ 1:( nrow(data$data)-(epochs-1) ) , ]
@@ -28,8 +37,9 @@ prepareDataDinamicBN <- function(data, epochs){
   data$data <- dinamic.data
 
   # Others
-  data$x.names <- grep("^[G]", colnames(dinamic.data), value=TRUE)
-  data$y.names <- grep("^[D]", colnames(dinamic.data), value=TRUE)
   data[["names.distribution"]] <- names.distribution
+  data[["x.names"]] <- NULL
+  data[["y.names"]] <- NULL
+
   return(data)
 }

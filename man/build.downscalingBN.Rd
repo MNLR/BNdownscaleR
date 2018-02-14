@@ -6,7 +6,9 @@
 \usage{
 build.downscalingBN(data, structure.learning.algorithm = "hc",
   structure.learning.args.list = list(), param.learning.method = "bayes",
-  forbid.global.arcs = TRUE, forbid.local.arcs = FALSE, two.step = FALSE,
+  forbid.global.arcs = TRUE, forbid.local.arcs = FALSE, dynamic = FALSE,
+  epochs = 2, forbid.backwards = FALSE, forbid.dynamic.GD = TRUE,
+  forbid.dynamic.global.arcs = TRUE, two.step = FALSE,
   structure.learning.algorithm2 = NULL,
   structure.learning.args.list2 = list(), return.first = FALSE,
   output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
@@ -85,10 +87,13 @@ If \code{return.first = TRUE}, the output will be a list containing \code{$first
 structure that allows the usage of plot.DBN() to examine the graph.
 \item \code{$last} contains the proper, ready to use, Bayesian Network.
 }
+
+\strong{Aditional details}
+\code{output.marginals} and \code{compile.junction} are useful to save time if the user only intends to visualize the DAG.
 }
 \examples{
 # Loading predictors
 }
 \author{
-Mikel Legasa
+MN Legasa
 }

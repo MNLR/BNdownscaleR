@@ -2,7 +2,6 @@ buildBlacklist <-function(fromS, toS, bidirectional){
   # combines all the fromS with all the toS
 
   NtoS <- length(toS)
-  blacklist <- matrix(nrow = 0, ncol = 2, byrow = TRUE, dimnames = list(NULL, c("from", "to")))
   blacklist.raw <- lapply(fromS, FUN =  function(from, toS) { cbind( matrix(from, NtoS, 1), toS) }, toS = toS  )
   blacklist <- do.call(rbind, blacklist.raw)
   colnames(blacklist) <- c("from", "to")

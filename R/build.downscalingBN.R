@@ -61,7 +61,8 @@
 #' \item \code{$last} contains the proper, ready to use, Bayesian Network.
 #' }
 #'
-#'
+#' \strong{Aditional details}
+#' \code{output.marginals} and \code{compile.junction} are useful to save time if the user only intends to visualize the DAG.
 #'
 #' @return An object of type DBN, which contains, in particular, the Bayesian Network.
 #' @author MN Legasa
@@ -75,8 +76,8 @@ build.downscalingBN <- function(data,
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
                                 forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
-                                dinamic = FALSE,
-                                epochs = 2, forbid.backwards = FALSE, forbid.dinamic.GD = TRUE, forbid.dinamic.global.arcs = TRUE,
+                                dynamic = FALSE,
+                                epochs = 2, forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE,
                                 two.step = FALSE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
@@ -88,11 +89,10 @@ build.downscalingBN <- function(data,
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
 
-  if (dinamic & epochs >= 2) {
-    data <- prepareDataDinamicBN(data, epochs)
-    if (forbid.dinamic.global.arcs) {
-
-    }
+  if (dynamic & epochs >= 2) {
+    data <- prepareDataDynamicBN(data, epochs)
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
+                                                           forbid.global.arcs, forbid.local.arcs)
   }
 
   POS <- data$positions
@@ -104,11 +104,11 @@ build.downscalingBN <- function(data,
     DATA <- data$data[ , (NX+1):(NX+NY)]
   }
   else{
-    if (forbid.global.arcs){
+    if (forbid.global.arcs & dynamic == FALSE){
       globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
     }
-    if (forbid.local.arcs){
+    if (forbid.local.arcs & dynamic == FALSE){
       localNodeNames <- data$y.names
       structure.learning.args.list <- add.toBlacklist(localNodeNames, structure.learning.args.list)
     }
@@ -179,7 +179,14 @@ build.downscalingBN <- function(data,
       junction <- NULL
     }
 
+    if (dynamic) {dynamic.args.list <- list( epochs = epochs,
+                                             forbid.backwards = forbid.backwards,
+                                             forbid.dynamic.GD = forbid.dynamic.GD,
+                                             forbid.dynamic.global.arcs = forbid.dynamic.global.arcs )}
+    else { dynamic.args.list <- NULL}
+
     return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
+                 dynamic.args.list = dynamic.args.list,
                  NX = NX,
                  marginals = marginals_,
                  structure.learning.algorithm = structure.learning.algorithm,

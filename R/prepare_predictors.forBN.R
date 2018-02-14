@@ -1,4 +1,17 @@
 
+#' prepare_predictors.forBN()
+#' @title
+#' @description
+#' @param grod Expects output from \code{\link[downscaleR]{prepare_predictors}}.
+#'
+#' @details
+#' @return A processed dataset to be passed to build.downscalingBN().
+#' @author MN Legasa
+#' @export
+#' @examples
+#' # Loading predictors
+
+
 prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observations" ) {
   # prepare.forBN() prepares standard climate4R grids, as output from prepare_predictors(), to be used for BN downscaling.
   # grid$x.global

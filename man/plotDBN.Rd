@@ -5,7 +5,7 @@
 \title{Plot Bayesian Network}
 \usage{
 plotDBN(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25,
-  dev = FALSE)
+  break.axis = 1, separation.ratio = 0.1, dev = FALSE)
 }
 \arguments{
 \item{DBN}{Downscaling Bayesian Network, as returned by build.downscalingBN(). This is a wrapper for plot.restrictedgraph.R}
