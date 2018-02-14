@@ -75,9 +75,10 @@ build.downscalingBN <- function(data,
                                 structure.learning.algorithm = "hc",
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
+                                only.relevant.arcs = TRUE,
                                 forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
-                                dynamic = FALSE,
-                                epochs = 2, forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE,
+                                dynamic = FALSE, epochs = 2,
+                                forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE, forbid.back.DD = TRUE,
                                 two.step = FALSE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
@@ -88,18 +89,26 @@ build.downscalingBN <- function(data,
                                 ) {
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
+  if (only.relevant.arcs) {
+    forbid.global.arcs <- TRUE
+    forbid.local.arcs <- FALSE
+    forbid.backwards <- FALSE
+    forbid.dynamic.GD <- TRUE
+    forbid.dynamic.global.arcs <- TRUE
+    forbid.back.DD <- TRUE
+  }
 
   if (dynamic & epochs >= 2) {
     data <- prepareDataDynamicBN(data, epochs)
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
-                                                           forbid.global.arcs, forbid.local.arcs)
+                                                           forbid.global.arcs, forbid.local.arcs, forbid.back.DD)
   }
 
   POS <- data$positions
   NX <- data$nx
   NY <- data$ny
 
-  if (two.step){ # First step has no global
+  if (two.step){ # First step has no globals
     POS <- POS[ , (NX+1):(NX+NY)]
     DATA <- data$data[ , (NX+1):(NX+NY)]
   }

@@ -1,6 +1,6 @@
 
 addtoBlacklistDynamic <- function(structure.learning.args.list, names.distribution,
-                                  forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs, forbid.global.arcs, forbid.local.arcs){
+                                  forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs, forbid.global.arcs, forbid.local.arcs, forbid.back.DD){
   if ( is.null(structure.learning.args.list$blacklist) ){
     blacklist <- matrix(, nrow = 0, ncol = 2)
     colnames(blacklist) <- c("from", "to")
@@ -34,8 +34,13 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
                              MoreArgs = list(tos = names.distribution),
                              SIMPLIFY = FALSE
     )
-
   structure.learning.args.list$blacklist <- rbind(structure.learning.args.list$blacklist, do.call(rbind, blacklist.list))
+  }
+
+  if (forbid.back.DD){
+    for (epoch in 1:(length(names.distribution)-1)){
+      structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$y.names, structure.learning.args.list)
+    }
   }
 
   if (forbid.global.arcs){

@@ -24,14 +24,11 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
 
     # Fix broken axis:
     N.atempnodes <- NCOL(DBN$positions)/DBN$dynamic.args.list$epochs
-    print(N.atempnodes)
     sep <- attributes(DBN$positions)$separation
     eps <- DBN$dynamic.args.list$epochs
 
     min.axis <- min(DBN$positions[ break.axis , 1:N.atempnodes])
     max.axis <- max(DBN$positions[ break.axis , 1:N.atempnodes])
-    print(min.axis)
-    print(max.axis)
     range <- abs(max.axis - min.axis)
     label.sep <- range/Nlabels
 
@@ -40,15 +37,11 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
     for (ep in 1:(eps-1)){
         label.positions <- c(label.positions, aux.label.positions + ep*sep)
     }
-    print(label.positions)
-    print("labels")
 
     labelS <- sprintf(rep(aux.label.positions, eps), fmt = '%#.1f')
     axis(break.axis, at=label.positions, labels=labelS)
     axis(as.numeric(xor(1,break.axis-1)) + 1)
-
     # Broken axis fixed
-    print(labelS)
 
   }
 }
