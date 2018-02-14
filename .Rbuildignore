@@ -3,3 +3,4 @@
 main.R
 things.R
 man/hello.Rd
+exampleplots/*

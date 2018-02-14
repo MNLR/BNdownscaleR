@@ -2,6 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+.gitignore
 things.R
 .Rprofile
 data/*
+test*
+main.R
