@@ -75,10 +75,9 @@ build.downscalingBN <- function(data,
                                 structure.learning.algorithm = "hc",
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
-                                only.relevant.arcs = TRUE,
                                 forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
-                                dynamic = FALSE, epochs = 2,
-                                forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE, forbid.back.DD = TRUE,
+                                dynamic = FALSE, epochs = 2, only.present.G = TRUE,
+                                forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE, forbid.past.DD = TRUE,
                                 two.step = FALSE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
@@ -89,19 +88,15 @@ build.downscalingBN <- function(data,
                                 ) {
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
-  if (only.relevant.arcs) {
-    forbid.global.arcs <- TRUE
-    forbid.local.arcs <- FALSE
-    forbid.backwards <- FALSE
-    forbid.dynamic.GD <- TRUE
-    forbid.dynamic.global.arcs <- TRUE
-    forbid.back.DD <- TRUE
-  }
 
   if (dynamic & epochs >= 2) {
     data <- prepareDataDynamicBN(data, epochs)
+    if (only.present.G) {
+      data <- purgeOldGs(data)
+      forbid.dynamic.global.arcs <- FALSE
+    }
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
-                                                           forbid.global.arcs, forbid.local.arcs, forbid.back.DD)
+                                                           forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
   }
 
   POS <- data$positions
@@ -188,15 +183,16 @@ build.downscalingBN <- function(data,
       junction <- NULL
     }
 
-    if (dynamic) {dynamic.args.list <- list( epochs = epochs,
+    if (dynamic) {dynamic.args.list <- list( epochs = epochs, only.present.G = only.present.G,
                                              forbid.backwards = forbid.backwards,
                                              forbid.dynamic.GD = forbid.dynamic.GD,
-                                             forbid.dynamic.global.arcs = forbid.dynamic.global.arcs )}
+                                             forbid.dynamic.global.arcs = forbid.dynamic.global.arcs,
+                                             forbid.past.DD = forbid.past.DD)}
     else { dynamic.args.list <- NULL}
 
     return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
                  dynamic.args.list = dynamic.args.list,
-                 NX = NX,
+                 NX = NX, NY = NY,
                  marginals = marginals_,
                  structure.learning.algorithm = structure.learning.algorithm,
                  structure.learning.args.list = structure.learning.args.list,

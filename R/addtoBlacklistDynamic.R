@@ -18,8 +18,10 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
   }
   if (forbid.dynamic.GD) {
     blacklist.list <- mapply(FUN = function(froms, tos, epoch) {
-                                     return(buildBlacklist( froms$x.names, as.vector(sapply(tos[-epoch], function(x) {x$y.names})) , bidirectional = TRUE))
-                                   },
+                                      if (!(is.null(froms$x.names))){ # can be NULL if past G nodes have been purged
+                                        return(buildBlacklist( froms$x.names, as.vector(sapply(tos[-epoch], function(x) {x$y.names})) , bidirectional = TRUE))
+                                      }
+                                    },
                              froms = Filter(Negate(is.null), names.distribution[1:epochs]), epoch = seq(1:epochs),
                              MoreArgs = list(tos = names.distribution),
                              SIMPLIFY = FALSE
@@ -38,14 +40,22 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
   }
 
   if (forbid.back.DD){
-    for (epoch in 1:(length(names.distribution)-1)){
-      structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$y.names, structure.learning.args.list)
-    }
+
+    structure.learning.args.list <- add.toBlacklist(
+      as.vector(unlist(lapply( Ddata$names.distribution[1:(epochs-1)], function(epoch) {return(epoch$y.names)}))),
+      structure.learning.args.list
+    )
+
+    #for (epoch in 1:(length(names.distribution)-1)){
+    #  structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$y.names, structure.learning.args.list)
+    #}
   }
 
   if (forbid.global.arcs){
     for (epoch in 1:length(names.distribution)){
-      structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$x.names, structure.learning.args.list)
+      if (!(is.null(names.distribution[[epoch]]$x.names))){ # Can be NULL if past G nodes have been purged
+        structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$x.names, structure.learning.args.list)
+      }
     }
   }
   if (forbid.local.arcs){

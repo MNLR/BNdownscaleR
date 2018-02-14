@@ -1,20 +1,38 @@
 #' @title Plot Bayesian Network
-#' @param DBN Downscaling Bayesian Network, as returned by build.downscalingBN(). This is a wrapper for plot.restrictedgraph.R
+#' @param DBN Downscaling Bayesian Network, as returned by build.downscalingBN().
 #' @author M.N. Legasa
 #' @export
 
 plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 3){
 
-  par(xpd=TRUE)
   if (!(is.null(DBN$dynamic.args.list))){
-    DBN$positions <- reallocateDynamicNodes(positions, break.axis, DBN$dynamic.args.list$epochs, separation.ratio = separation.ratio)
+    DBN$positions <- reallocateDynamicNodes(DBN$positions, break.axis, DBN$dynamic.args.list$epochs,
+                                            separation.ratio = separation.ratio)
+    if (DBN$dynamic.args.list$only.present.G){ # purge past G nodes
+      nx <- DBN$NX
+      ny <- DBN$NY
+      epS <- DBN$dynamic.args.list$epochs
+      sep <- attributes(DBN$positions)$separation
+
+      purge.index <- 1:nx
+      aux.purge.index <- purge.index
+
+      if (epS > 2){
+        for (ep in 1:(epS-2)){
+          purge.index <- c(purge.index , aux.purge.index + (nx+ny))
+        }
+      }
+      DBN$positions <-DBN$positions[ , -purge.index]
+    }
+
     axes <- FALSE
   } else { axes <- TRUE }
 
   plotLatLonDAG( bn = DBN$BN , positions = DBN$positions, distance = DBN$bnlearning.args.list$distance,
-                       nodes = nodes, node.size = node.size, edge.arrow.size = edge.arrow.size , dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
+                       nodes = nodes, node.size = node.size, edge.arrow.size = edge.arrow.size,
+                 dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
 
-  if (!(is.null(DBN$dynamic.args.list))){
+  if (!(is.null(DBN$dynamic.args.list))){ # Aditional operations for dynamic:
     mn <- min(DBN$positions[break.axis, ])
     mx <- max(DBN$positions[break.axis, ])
     range <- abs( mx - mn )
@@ -23,25 +41,24 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
     }
 
     # Fix broken axis:
-    N.atempnodes <- NCOL(DBN$positions)/DBN$dynamic.args.list$epochs
-    sep <- attributes(DBN$positions)$separation
+    N.atempnodes <- DBN$NX + DBN$NY
     eps <- DBN$dynamic.args.list$epochs
 
-    min.axis <- min(DBN$positions[ break.axis , 1:N.atempnodes])
-    max.axis <- max(DBN$positions[ break.axis , 1:N.atempnodes])
-    range <- abs(max.axis - min.axis)
-    label.sep <- range/Nlabels
+    min.axis <- min(DBN$positions[ break.axis , (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
+    max.axis <- max(DBN$positions[ break.axis , (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
 
-    label.positions <- seq(min.axis, max.axis, by = label.sep)
+    range <- abs(max.axis - min.axis)
+
+    label.positions <- seq(min.axis, max.axis, by = range/Nlabels)
     aux.label.positions <- label.positions
+
     for (ep in 1:(eps-1)){
-        label.positions <- c(label.positions, aux.label.positions + ep*sep)
+      label.positions <- c(label.positions, aux.label.positions + ep*sep)
     }
 
     labelS <- sprintf(rep(aux.label.positions, eps), fmt = '%#.1f')
     axis(break.axis, at=label.positions, labels=labelS)
     axis(as.numeric(xor(1,break.axis-1)) + 1)
     # Broken axis fixed
-
   }
 }

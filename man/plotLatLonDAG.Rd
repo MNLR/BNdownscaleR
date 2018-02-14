@@ -5,7 +5,8 @@
 \title{Plot a Graph placing nodes in euclidean coordinates \code{positions}}
 \usage{
 plotLatLonDAG(bn, positions, distance = NULL, nodes = -1, node.size = 4,
-  edge.arrow.size = 0.15, dev = FALSE, xlab = "x", ylab = "y")
+  edge.arrow.size = 0.15, dev = FALSE, axes = TRUE, xlab = "x",
+  ylab = "y")
 }
 \author{
 M.N. Legasa
