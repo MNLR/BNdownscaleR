@@ -9,7 +9,7 @@ build.downscalingBN(data, structure.learning.algorithm = "hc",
   forbid.global.arcs = TRUE, forbid.local.arcs = FALSE, dynamic = FALSE,
   epochs = 2, only.present.G = TRUE, forbid.backwards = FALSE,
   forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE,
-  forbid.back.DD = TRUE, two.step = FALSE,
+  forbid.past.DD = TRUE, structure.learning.steps = NULL,
   structure.learning.algorithm2 = NULL,
   structure.learning.args.list2 = list(), return.first = FALSE,
   output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
@@ -32,9 +32,6 @@ is used. Refer to \code{\link[bnlearn]{bnlearn}} for the specific options.}
 \item{forbid.local.arcs}{Arcs between local, i.e. station nodes, will be forbidden.
 Will be used in second step if two.step is set to TRUE. See \code{Details}.}
 
-\item{two.step}{Learn first a local bayesian network, i.e. just for the stations, then inject global (grid) nodes. See arguments
-\code{structure.learning.algorithm2} and \code{structure.learning.args.list2}. See \code{Details}.}
-
 \item{structure.learning.algorithm2}{Same as structure.learning.algorithm for the global injection process,
 ignored if two.step is set to FALSE. See \code{Details}.}
 
@@ -53,6 +50,9 @@ in which case it will be computed at the training stage.}
 
 \item{cluster.type}{Either "PSOCK" or "FORK". Use the former under Windows systems, refer to \code{\link[parallel]{parallel}}
 package.}
+
+\item{two.step}{Learn first a local bayesian network, i.e. just for the stations, then inject global (grid) nodes. See arguments
+\code{structure.learning.algorithm2} and \code{structure.learning.args.list2}. See \code{Details}.}
 }
 \value{
 An object of type DBN, which contains, in particular, the Bayesian Network.
@@ -91,6 +91,8 @@ structure that allows the usage of plot.DBN() to examine the graph.
 
 \strong{Aditional details}
 \code{output.marginals} and \code{compile.junction} are useful to save time if the user only intends to visualize the DAG.
+\code{whitelist} and \code{blacklist} arguments can be passed to structure.learning.args.list, but beware of the naming convention,
+it is best to use plotDBN() first with a dummy network.
 }
 \examples{
 # Loading predictors

@@ -3,16 +3,17 @@
 #' @author M.N. Legasa
 #' @export
 
-plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 3){
+plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 4){
 
   if (!(is.null(DBN$dynamic.args.list))){
     DBN$positions <- reallocateDynamicNodes(DBN$positions, break.axis, DBN$dynamic.args.list$epochs,
                                             separation.ratio = separation.ratio)
+
+    sep <- attributes(DBN$positions)$separation
     if (DBN$dynamic.args.list$only.present.G){ # purge past G nodes
       nx <- DBN$NX
       ny <- DBN$NY
       epS <- DBN$dynamic.args.list$epochs
-      sep <- attributes(DBN$positions)$separation
 
       purge.index <- 1:nx
       aux.purge.index <- purge.index

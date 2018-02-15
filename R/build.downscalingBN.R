@@ -63,7 +63,8 @@
 #'
 #' \strong{Aditional details}
 #' \code{output.marginals} and \code{compile.junction} are useful to save time if the user only intends to visualize the DAG.
-#'
+#' \code{whitelist} and \code{blacklist} arguments can be passed to structure.learning.args.list, but beware of the naming convention,
+#' it is best to use plotDBN() first with a dummy network.
 #' @return An object of type DBN, which contains, in particular, the Bayesian Network.
 #' @author MN Legasa
 #' @export
@@ -78,9 +79,11 @@ build.downscalingBN <- function(data,
                                 forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
                                 dynamic = FALSE, epochs = 2, only.present.G = TRUE,
                                 forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE, forbid.past.DD = TRUE,
-                                two.step = FALSE,
+                                structure.learning.steps = NULL,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
+                                structure.learning.algorithm3 = NULL,
+                                structure.learning.args.list3 = list(),
                                 return.first = FALSE,
                                 output.marginals = TRUE,
                                 compile.junction = TRUE,
@@ -89,7 +92,7 @@ build.downscalingBN <- function(data,
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
 
-  if (dynamic & epochs >= 2) {
+  if (dynamic & epochs >= 2 & is.null(data$names.distribution)) {
     data <- prepareDataDynamicBN(data, epochs)
     if (only.present.G) {
       data <- purgeOldGs(data)
@@ -103,11 +106,15 @@ build.downscalingBN <- function(data,
   NX <- data$nx
   NY <- data$ny
 
-  if (two.step){ # First step has no globals
-    POS <- POS[ , (NX+1):(NX+NY)]
-    DATA <- data$data[ , (NX+1):(NX+NY)]
+  if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
+    aux <- handleLearningSteps(data, structure.learning.steps, dynamic)
+    POS <- aux$POS
+    DATA <- aux$DATA
+    structure.learning.steps <- aux$structure.learning.steps
+    steps.left <- length(structure.learning.steps)
   }
   else{
+    steps.left <- 0
     if (forbid.global.arcs & dynamic == FALSE){
       globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
@@ -138,31 +145,46 @@ build.downscalingBN <- function(data,
   }
   else if ( (alg == "mmhc") | (alg == "rsmax2") ) { bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )} # Non parallelizable, need cextend arc direction
   else { bn <-  do.call(structure.learning.algorithm, structure.learning.args.list) } # Non parallelizable, already DAG (directed)
-  if (!two.step){ bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method) }
+  if (steps.left == 0){ bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method) }
   print("Done building Bayesian Network.")
 
-  if ( two.step ){
-    print("Injecting Globals into Bayesian Network...")
+  if ( steps.left >= 1){
+    print("Injecting next step into Bayesian Network...")
     whitelist <- bn$arcs
 
     if (is.null(structure.learning.algorithm2) ){ structure.learning.algorithm2 <- structure.learning.algorithm }
 
-    if ( is.null(structure.learning.args.list2$whitelist) ){ structure.learning.args.list2[["whitelist"]] <- whitelist }
-    else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
-
+    if (steps.left == 2){
+      if (is.null(structure.learning.algorithm3)){
+        structure.learning.algorithm3 <- structure.learning.algorithm2
+      }
+      if ( is.null(structure.learning.args.list3$whitelist) ){ structure.learning.args.list3[["whitelist"]] <- whitelist }
+      else{ rbind(whitelist, structure.learning.args.list3$whitelist) }
+    }
+    else {
+      if ( is.null(structure.learning.args.list2$whitelist) ){ structure.learning.args.list2[["whitelist"]] <- whitelist }
+      else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
+    }
+    print(whitelist)
     DBN <-  build.downscalingBN(data,
                                 forbid.global.arcs = forbid.global.arcs,
                                 forbid.local.arcs = forbid.local.arcs,
                                 structure.learning.algorithm = structure.learning.algorithm2,
                                 structure.learning.args.list = structure.learning.args.list2,
+                                structure.learning.algorithm2 = structure.learning.algorithm3,
+                                structure.learning.args.list2 = structure.learning.args.list3,
+                                dynamic = dynamic,
+                                structure.learning.steps = structure.learning.steps,
                                 parallelize = parallelize, n.cores= n.cores, cluster.type = cluster.type,
                                 output.marginals = output.marginals,
                                 compile.junction = compile.junction,
-                                param.learning.method = param.learning.method,
-                                two.step = FALSE)
+                                param.learning.method = param.learning.method
+                                )
     if (return.first){
-      return( list(first = list(BN = bn, training.data = DATA, positions = POS,  structure.learning.args.list = structure.learning.args.list),
-                   last = DBN) )
+      print("return.first is deactivated")
+      #return( list(first = list(BN = bn, training.data = DATA, positions = POS,  structure.learning.args.list = structure.learning.args.list),
+      #             last = DBN) )
+      return(DBN)
     }
     else { return(DBN) }
   }
