@@ -1,12 +1,12 @@
 
 addtoBlacklistDynamic <- function(structure.learning.args.list, names.distribution,
-                                  forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs, forbid.global.arcs, forbid.local.arcs, forbid.back.DD){
+                                  forbid.backwards, forbid.past.GD, forbid.dynamic.GG, forbid.GG, forbid.local.arcs, forbid.past.DD){
   if ( is.null(structure.learning.args.list$blacklist) ){
     blacklist <- matrix(, nrow = 0, ncol = 2)
     colnames(blacklist) <- c("from", "to")
     structure.learning.args.list[["blacklist"]] <-  blacklist
   }
-
+  print(names.distribution)
   epochs <- length(names.distribution)
   if (forbid.backwards) {
     aux <- Filter(Negate(is.null), names.distribution[2:epochs]) # purges NULL elements
@@ -16,7 +16,7 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
     )
     structure.learning.args.list$blacklist <- rbind(structure.learning.args.list$blacklist, do.call(rbind, blacklist.list))
   }
-  if (forbid.dynamic.GD) {
+  if (forbid.past.GD) {
     blacklist.list <- mapply(FUN = function(froms, tos, epoch) {
                                       if (!(is.null(froms$x.names))){ # can be NULL if past G nodes have been purged
                                         return(buildBlacklist( froms$x.names, as.vector(sapply(tos[-epoch], function(x) {x$y.names})) , bidirectional = TRUE))
@@ -28,7 +28,7 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
     )
     structure.learning.args.list$blacklist <- rbind(structure.learning.args.list$blacklist, do.call(rbind, blacklist.list))
   }
-  if (forbid.dynamic.global.arcs) {
+  if (forbid.dynamic.GG) {
     blacklist.list <- mapply(FUN = function(froms, tos, epoch) {
                                      return(buildBlacklist( froms$x.names, as.vector(sapply(tos[-(1:epoch)], function(x) {x$x.names})), bidirectional = TRUE ))
                                    },
@@ -39,19 +39,19 @@ addtoBlacklistDynamic <- function(structure.learning.args.list, names.distributi
   structure.learning.args.list$blacklist <- rbind(structure.learning.args.list$blacklist, do.call(rbind, blacklist.list))
   }
 
-  if (forbid.back.DD){
-
-    structure.learning.args.list <- add.toBlacklist(
-      as.vector(unlist(lapply( Ddata$names.distribution[1:(epochs-1)], function(epoch) {return(epoch$y.names)}))),
-      structure.learning.args.list
-    )
+  if (forbid.past.DD){
+    atB <- as.vector(unlist(lapply( Ddata$names.distribution[1:(epochs-1)], function(epoch) {return(epoch$y.names)})))
+    print(atB)
+    if (!is.null(atB)){
+      structure.learning.args.list <- add.toBlacklist(atB, structure.learning.args.list)
+    }
 
     #for (epoch in 1:(length(names.distribution)-1)){
     #  structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$y.names, structure.learning.args.list)
     #}
   }
 
-  if (forbid.global.arcs){
+  if (forbid.GG){
     for (epoch in 1:length(names.distribution)){
       if (!(is.null(names.distribution[[epoch]]$x.names))){ # Can be NULL if past G nodes have been purged
         structure.learning.args.list <- add.toBlacklist(names.distribution[[epoch]]$x.names, structure.learning.args.list)

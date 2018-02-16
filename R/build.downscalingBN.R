@@ -12,8 +12,8 @@
 #' Refer to \code{Details} for a list of supported algorithms.
 #' @param structure.learning.args.list List of arguments passed to structure.learning.algorithm, in particular distance argument if local learning
 #' is used. Refer to \code{\link[bnlearn]{bnlearn}} for the specific options.
-#' @param forbid.global.arcs      Arcs between grid nodes will be forbidden.
-#' @param forbid.local.arcs       Arcs between local, i.e. station nodes, will be forbidden.
+#' @param forbid.GG      Arcs between grid nodes will be forbidden.
+#' @param forbid.DD       Arcs between local, i.e. station nodes, will be forbidden.
 #' Will be used in second step if two.step is set to TRUE. See \code{Details}.
 #' @param param.learning.method Either "bayes" or "mle", passed to learn the parameters of the built network structure from \code{data}.
 #' @param two.step Learn first a local bayesian network, i.e. just for the stations, then inject global (grid) nodes. See arguments
@@ -49,10 +49,10 @@
 #' Note:
 #' \itemize{
 #' \item First step uses parameters \code{structure.learning.algorithm} and \code{structure.learning.args.list} are used for the
-#' construction of the first DAG. \code{forbid.global.arcs} and \code{forbid.local.arcs} are ignored at this stage.
+#' construction of the first DAG. \code{forbid.GG} and \code{forbid.DD} are ignored at this stage.
 #' \item Global injection step uses \code{structure.learning.algorithm2} and \code{structure.learning.args.list2} for learning the
-#' DAG structure. At this stage, \code{forbid.global.arcs = TRUE} will forbid arcs between grid (predictor) nodes, whereas
-#' \code{forbid.local.arcs} will forbid the creation of new arcs between local (predictand) nodes.
+#' DAG structure. At this stage, \code{forbid.GG = TRUE} will forbid arcs between grid (predictor) nodes, whereas
+#' \code{forbid.DD} will forbid the creation of new arcs between local (predictand) nodes.
 #' }
 #' If \code{return.first = TRUE}, the output will be a list containing \code{$first} and \code{$last}:
 #' #' \itemize{
@@ -76,9 +76,9 @@ build.downscalingBN <- function(data,
                                 structure.learning.algorithm = "hc",
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
-                                forbid.global.arcs = TRUE, forbid.local.arcs = FALSE,
-                                dynamic = FALSE, epochs = 2, only.present.G = TRUE,
-                                forbid.backwards = FALSE, forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE, forbid.past.DD = TRUE,
+                                forbid.GG = TRUE, forbid.DD = FALSE,
+                                dynamic = FALSE, epochs = 2, remove.past.G = TRUE,
+                                forbid.backwards = FALSE, forbid.past.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
                                 structure.learning.steps = NULL,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
@@ -91,12 +91,17 @@ build.downscalingBN <- function(data,
                                 ) {
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
+  if (remove.past.G) {
+    forbid.past.GD <- FALSE
+    forbid.dynamic.GG <- FALSE
+  }
 
-  if (dynamic & epochs >= 2 & is.null(data$names.distribution)) {
+
+  if (dynamic & epochs >= 2 & is.null(data$names.distribution)) { # is.null(data$data) = TRUE when already processed for Dynamic
     data <- prepareDataDynamicBN(data, epochs)
-    if (only.present.G) {
-      data <- purgeOldGs(data)
-      forbid.dynamic.global.arcs <- FALSE
+    if (remove.past.G) {
+      data <- purgePastGs(data)
+      forbid.dynamic.GG <- FALSE
     }
   }
 
@@ -107,24 +112,26 @@ build.downscalingBN <- function(data,
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
     aux <- handleLearningSteps(data, structure.learning.steps, dynamic)
+    if (is.null(aux)) {stop("Please, use a valid structure.learning.steps option.")}
+
     POS <- aux$POS
     DATA <- aux$DATA
     structure.learning.steps <- aux$structure.learning.steps
     steps.left <- length(structure.learning.steps)
     print(paste0(paste0("Building intermediate DAG ", steps.left),"..." ))
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
-                                                          forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, aux$names.distribution, forbid.backwards, forbid.past.GD, forbid.dynamic.GG,
+                                                          forbid.GG, forbid.DD, forbid.past.DD)
   }
   else{
     print("Building Bayesian Network...")
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
-                                                          forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.GD, forbid.dynamic.GG,
+                                                          forbid.GG, forbid.DD, forbid.past.DD)
 
-    if (forbid.global.arcs & dynamic == FALSE){
+    if (forbid.GG & dynamic == FALSE){
       globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
     }
-    if (forbid.local.arcs & dynamic == FALSE){
+    if (forbid.DD & dynamic == FALSE){
       localNodeNames <- data$y.names
       structure.learning.args.list <- add.toBlacklist(localNodeNames, structure.learning.args.list)
     }
@@ -165,16 +172,16 @@ build.downscalingBN <- function(data,
     else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
 
     DBN <-  build.downscalingBN(data,
-                                forbid.global.arcs = forbid.global.arcs,
-                                forbid.local.arcs = forbid.local.arcs,
+                                forbid.GG = forbid.GG,
+                                forbid.DD = forbid.DD,
                                 structure.learning.algorithm = structure.learning.algorithm2,
                                 structure.learning.args.list = structure.learning.args.list2,
                                 structure.learning.algorithm2 = structure.learning.algorithm3,
                                 structure.learning.args.list2 = structure.learning.args.list3,
                                 return.intermediate = return.intermediate,
-                                dynamic = dynamic, epochs = epochs, only.present.G = only.present.G,
-                                forbid.backwards = forbid.backwards, forbid.dynamic.GD = forbid.dynamic.GD,
-                                forbid.dynamic.global.arcs = forbid.dynamic.global.arcs, forbid.past.DD = forbid.past.DD,
+                                dynamic = dynamic, epochs = epochs, remove.past.G = remove.past.G,
+                                forbid.backwards = forbid.backwards, forbid.past.GD = forbid.past.GD,
+                                forbid.dynamic.GG = forbid.dynamic.GG, forbid.past.DD = forbid.past.DD,
                                 structure.learning.steps = structure.learning.steps,
                                 parallelize = parallelize, n.cores= n.cores, cluster.type = cluster.type,
                                 output.marginals = output.marginals,
@@ -208,10 +215,10 @@ build.downscalingBN <- function(data,
     }
     else {junction <- NULL}
 
-    if (dynamic) {dynamic.args.list <- list( epochs = epochs, only.present.G = only.present.G,
+    if (dynamic) {dynamic.args.list <- list( epochs = epochs, remove.past.G = remove.past.G,
                                              forbid.backwards = forbid.backwards,
-                                             forbid.dynamic.GD = forbid.dynamic.GD,
-                                             forbid.dynamic.global.arcs = forbid.dynamic.global.arcs,
+                                             forbid.past.GD = forbid.past.GD,
+                                             forbid.dynamic.GG = forbid.dynamic.GG,
                                              forbid.past.DD = forbid.past.DD)}
     else {dynamic.args.list <- NULL}
 

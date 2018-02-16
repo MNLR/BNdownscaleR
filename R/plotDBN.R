@@ -10,7 +10,7 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
                                             separation.ratio = separation.ratio)
 
     sep <- attributes(DBN$positions)$separation
-    if (DBN$dynamic.args.list$only.present.G){ # purge past G nodes
+    if (DBN$dynamic.args.list$remove.past.G){ # purged past G nodes
       nx <- DBN$NX
       ny <- DBN$NY
       epS <- DBN$dynamic.args.list$epochs

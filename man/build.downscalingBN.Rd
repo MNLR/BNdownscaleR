@@ -6,12 +6,13 @@
 \usage{
 build.downscalingBN(data, structure.learning.algorithm = "hc",
   structure.learning.args.list = list(), param.learning.method = "bayes",
-  forbid.global.arcs = TRUE, forbid.local.arcs = FALSE, dynamic = FALSE,
-  epochs = 2, only.present.G = TRUE, forbid.backwards = FALSE,
-  forbid.dynamic.GD = TRUE, forbid.dynamic.global.arcs = TRUE,
-  forbid.past.DD = TRUE, structure.learning.steps = NULL,
-  structure.learning.algorithm2 = NULL,
-  structure.learning.args.list2 = list(), return.first = FALSE,
+  forbid.GG = TRUE, forbid.DD = FALSE, dynamic = FALSE, epochs = 2,
+  remove.past.G = TRUE, forbid.backwards = FALSE, forbid.past.GD = TRUE,
+  forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
+  structure.learning.steps = NULL, structure.learning.algorithm2 = NULL,
+  structure.learning.args.list2 = list(),
+  structure.learning.algorithm3 = NULL,
+  structure.learning.args.list3 = list(), return.intermediate = FALSE,
   output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
   n.cores = NULL, cluster.type = "PSOCK")
 }
@@ -27,9 +28,9 @@ is used. Refer to \code{\link[bnlearn]{bnlearn}} for the specific options.}
 
 \item{param.learning.method}{Either "bayes" or "mle", passed to learn the parameters of the built network structure from \code{data}.}
 
-\item{forbid.global.arcs}{Arcs between grid nodes will be forbidden.}
+\item{forbid.GG}{Arcs between grid nodes will be forbidden.}
 
-\item{forbid.local.arcs}{Arcs between local, i.e. station nodes, will be forbidden.
+\item{forbid.DD}{Arcs between local, i.e. station nodes, will be forbidden.
 Will be used in second step if two.step is set to TRUE. See \code{Details}.}
 
 \item{structure.learning.algorithm2}{Same as structure.learning.algorithm for the global injection process,
@@ -77,10 +78,10 @@ nodes, then a second graph, containing the first as a subgraph and with the grid
 Note:
 \itemize{
 \item First step uses parameters \code{structure.learning.algorithm} and \code{structure.learning.args.list} are used for the
-construction of the first DAG. \code{forbid.global.arcs} and \code{forbid.local.arcs} are ignored at this stage.
+construction of the first DAG. \code{forbid.GG} and \code{forbid.DD} are ignored at this stage.
 \item Global injection step uses \code{structure.learning.algorithm2} and \code{structure.learning.args.list2} for learning the
-DAG structure. At this stage, \code{forbid.global.arcs = TRUE} will forbid arcs between grid (predictor) nodes, whereas
-\code{forbid.local.arcs} will forbid the creation of new arcs between local (predictand) nodes.
+DAG structure. At this stage, \code{forbid.GG = TRUE} will forbid arcs between grid (predictor) nodes, whereas
+\code{forbid.DD} will forbid the creation of new arcs between local (predictand) nodes.
 }
 If \code{return.first = TRUE}, the output will be a list containing \code{$first} and \code{$last}:
 #' \itemize{

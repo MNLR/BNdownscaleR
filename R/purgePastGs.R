@@ -1,7 +1,7 @@
 
 #' @export
 
-purgeOldGs <- function(Ddata){
+purgePastGs <- function(Ddata){
 
   nx <- Ddata$nx
   ny <- Ddata$ny
