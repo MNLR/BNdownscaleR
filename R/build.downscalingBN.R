@@ -84,7 +84,7 @@ build.downscalingBN <- function(data,
                                 structure.learning.args.list2 = list(),
                                 structure.learning.algorithm3 = NULL,
                                 structure.learning.args.list3 = list(),
-                                return.first = FALSE,
+                                return.intermediate = FALSE,
                                 output.marginals = TRUE,
                                 compile.junction = TRUE,
                                 parallelize = FALSE, n.cores= NULL, cluster.type = "PSOCK"
@@ -98,13 +98,12 @@ build.downscalingBN <- function(data,
       data <- purgeOldGs(data)
       forbid.dynamic.global.arcs <- FALSE
     }
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
-                                                           forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
   }
 
   POS <- data$positions
   NX <- data$nx
   NY <- data$ny
+  steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
     aux <- handleLearningSteps(data, structure.learning.steps, dynamic)
@@ -112,9 +111,15 @@ build.downscalingBN <- function(data,
     DATA <- aux$DATA
     structure.learning.steps <- aux$structure.learning.steps
     steps.left <- length(structure.learning.steps)
+    print(paste0(paste0("Building intermediate DAG ", steps.left),"..." ))
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
+                                                          forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
   }
   else{
-    steps.left <- 0
+    print("Building Bayesian Network...")
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.dynamic.GD, forbid.dynamic.global.arcs,
+                                                          forbid.global.arcs, forbid.local.arcs, forbid.past.DD)
+
     if (forbid.global.arcs & dynamic == FALSE){
       globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
@@ -132,7 +137,6 @@ build.downscalingBN <- function(data,
 
   structure.learning.args.list[["x"]] <- DATA
 
-  print("Building Bayesian Network...")
   alg <- strsplit(structure.learning.algorithm, split = ".", fixed = TRUE)[[1]][1]
   if ( (alg == "gs") | (alg == "iamb") | (alg == "fast")  | (alg == "inter") | (alg == "inter") ) { # Constraint based, parallelizable
     cl <- NULL
@@ -145,27 +149,21 @@ build.downscalingBN <- function(data,
   }
   else if ( (alg == "mmhc") | (alg == "rsmax2") ) { bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )} # Non parallelizable, need cextend arc direction
   else { bn <-  do.call(structure.learning.algorithm, structure.learning.args.list) } # Non parallelizable, already DAG (directed)
-  if (steps.left == 0){ bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method) }
-  print("Done building Bayesian Network.")
+  if (steps.left == 0){
+    bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method)
+    print("Done building Bayesian Network.")
+  }
 
   if ( steps.left >= 1){
     print("Injecting next step into Bayesian Network...")
     whitelist <- bn$arcs
 
     if (is.null(structure.learning.algorithm2) ){ structure.learning.algorithm2 <- structure.learning.algorithm }
+    if (steps.left == 2){ if (is.null(structure.learning.algorithm3)){ structure.learning.algorithm3 <- structure.learning.algorithm2 }}
 
-    if (steps.left == 2){
-      if (is.null(structure.learning.algorithm3)){
-        structure.learning.algorithm3 <- structure.learning.algorithm2
-      }
-      if ( is.null(structure.learning.args.list3$whitelist) ){ structure.learning.args.list3[["whitelist"]] <- whitelist }
-      else{ rbind(whitelist, structure.learning.args.list3$whitelist) }
-    }
-    else {
-      if ( is.null(structure.learning.args.list2$whitelist) ){ structure.learning.args.list2[["whitelist"]] <- whitelist }
-      else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
-    }
-    print(whitelist)
+    if ( is.null(structure.learning.args.list2$whitelist) ){ structure.learning.args.list2[["whitelist"]] <- whitelist }
+    else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
+
     DBN <-  build.downscalingBN(data,
                                 forbid.global.arcs = forbid.global.arcs,
                                 forbid.local.arcs = forbid.local.arcs,
@@ -173,23 +171,30 @@ build.downscalingBN <- function(data,
                                 structure.learning.args.list = structure.learning.args.list2,
                                 structure.learning.algorithm2 = structure.learning.algorithm3,
                                 structure.learning.args.list2 = structure.learning.args.list3,
-                                dynamic = dynamic,
+                                return.intermediate = return.intermediate,
+                                dynamic = dynamic, epochs = epochs, only.present.G = only.present.G,
+                                forbid.backwards = forbid.backwards, forbid.dynamic.GD = forbid.dynamic.GD,
+                                forbid.dynamic.global.arcs = forbid.dynamic.global.arcs, forbid.past.DD = forbid.past.DD,
                                 structure.learning.steps = structure.learning.steps,
                                 parallelize = parallelize, n.cores= n.cores, cluster.type = cluster.type,
                                 output.marginals = output.marginals,
                                 compile.junction = compile.junction,
                                 param.learning.method = param.learning.method
                                 )
-    if (return.first){
-      print("return.first is deactivated")
+    if (return.intermediate){
       #return( list(first = list(BN = bn, training.data = DATA, positions = POS,  structure.learning.args.list = structure.learning.args.list),
       #             last = DBN) )
+      if (steps.left == 2){
+        DBN[["intermediateDBN2"]] <- list(BN = bn, training.data = DATA, positions = POS, structure.learning.args.list = structure.learning.args.list)
+      }
+      if (steps.left == 1){
+        DBN[["intermediateDBN1"]] <- list(BN = bn, training.data = DATA, positions = POS, structure.learning.args.list = structure.learning.args.list)
+      }
       return(DBN)
     }
     else { return(DBN) }
   }
   else {
-
     if (output.marginals){
       print("Computing Marginal Distributions...")
       marginals_ <- marginals( list(BN = bn, BN.fit = bn.fit, NX = NX) )
@@ -201,16 +206,14 @@ build.downscalingBN <- function(data,
       junction <- compile( as.grain(bn.fit) )
       print("Done.")
     }
-    else {
-      junction <- NULL
-    }
+    else {junction <- NULL}
 
     if (dynamic) {dynamic.args.list <- list( epochs = epochs, only.present.G = only.present.G,
                                              forbid.backwards = forbid.backwards,
                                              forbid.dynamic.GD = forbid.dynamic.GD,
                                              forbid.dynamic.global.arcs = forbid.dynamic.global.arcs,
                                              forbid.past.DD = forbid.past.DD)}
-    else { dynamic.args.list <- NULL}
+    else {dynamic.args.list <- NULL}
 
     return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
                  dynamic.args.list = dynamic.args.list,
