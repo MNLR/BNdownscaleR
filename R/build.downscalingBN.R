@@ -110,23 +110,30 @@ build.downscalingBN <- function(data,
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
+    if ( length(structure.learning.steps) == 1 && structure.learning.steps == 2) {
+      structure.learning.steps <- c("local-global", "past")
+      print(paste0("Learning process set to default dynamic 2 step:", " c(\"local-global\", \"past\")"))
+    }
+    if ( length(structure.learning.steps) == 1 && structure.learning.steps == 3) {
+      structure.learning.steps <- c("local", "global", "past")
+      print(paste0("Learning process set to default dynamic 3 step:", " c(\"local\", \"global\", \"past\")"))
+    }
+
     aux <- handleLearningSteps(data, structure.learning.steps, dynamic)
     if (is.null(aux)) {stop("Please, use a valid structure.learning.steps option.")}
 
     POS <- aux$POS
     DATA <- aux$DATA
+    steps.left <- length(aux$structure.learning.steps)
+    print(paste0( c("Building intermediate DAG ", steps.left , " using " , structure.learning.algorithm, " for ", structure.learning.steps[1], " nodes", "..." ),
+                  collapse = ""))
     structure.learning.steps <- aux$structure.learning.steps
-    steps.left <- length(structure.learning.steps)
-    print(paste0(paste0("Building intermediate DAG ", steps.left),"..." ))
     #print(aux$names.distribution)
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, aux$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
-    print("Blacklist:")
-    print(structure.learning.args.list$blacklist)
-    print("EBlacklist")
   }
   else{
-    print("Building Bayesian Network...")
+    print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ))
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
 
@@ -165,7 +172,7 @@ build.downscalingBN <- function(data,
   }
 
   if ( steps.left >= 1){
-    print("Injecting next step into Bayesian Network...")
+    print("Injecting next step into the DAG...")
     whitelist <- bn$arcs
 
     if (is.null(structure.learning.algorithm2) ){ structure.learning.algorithm2 <- structure.learning.algorithm }
