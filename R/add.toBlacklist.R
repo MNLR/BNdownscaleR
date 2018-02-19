@@ -7,6 +7,5 @@ add.toBlacklist <- function(nodes, bnlearning.args.list){
     bnlearning.args.list$blacklist <- rbind(bnlearning.args.list$blacklist,  global.restrictions)
   }
   else { bnlearning.args.list[["blacklist"]] <- global.restrictions }
-
   return(bnlearning.args.list)
 }

@@ -13,7 +13,7 @@ parallel.starter <- function(type, n.cores,
   }
 
   # Initiate cluster
-  print("Starting cluster...")
+  print("Starting cluster for parallel computation...")
   cl <- makeCluster( n.cores, type = type )
 
   if (type == "PSOCK") {

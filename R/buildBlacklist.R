@@ -1,6 +1,10 @@
 buildBlacklist <-function(fromS, toS, bidirectional){
   # combines all the fromS with all the toS
-
+  print("FROMS:")
+  print(fromS)
+  print("TOS")
+  print(toS)
+  print("EFT")
   NtoS <- length(toS)
   blacklist.raw <- lapply(fromS, FUN =  function(from, toS) { cbind( matrix(from, NtoS, 1), toS) }, toS = toS  )
   blacklist <- do.call(rbind, blacklist.raw)

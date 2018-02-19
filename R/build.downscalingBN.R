@@ -78,8 +78,8 @@ build.downscalingBN <- function(data,
                                 param.learning.method = "bayes",
                                 forbid.GG = TRUE, forbid.DD = FALSE,
                                 dynamic = FALSE, epochs = 2, remove.past.G = TRUE,
-                                forbid.backwards = FALSE, forbid.past.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
-                                structure.learning.steps = NULL,
+                                forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
+                                structure.learning.steps = c("local", "global", "past"),
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
                                 structure.learning.algorithm3 = NULL,
@@ -92,7 +92,6 @@ build.downscalingBN <- function(data,
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
   if (remove.past.G) {
-    forbid.past.GD <- FALSE
     forbid.dynamic.GG <- FALSE
   }
 
@@ -119,12 +118,16 @@ build.downscalingBN <- function(data,
     structure.learning.steps <- aux$structure.learning.steps
     steps.left <- length(structure.learning.steps)
     print(paste0(paste0("Building intermediate DAG ", steps.left),"..." ))
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, aux$names.distribution, forbid.backwards, forbid.past.GD, forbid.dynamic.GG,
+    #print(aux$names.distribution)
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, aux$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
+    print("Blacklist:")
+    print(structure.learning.args.list$blacklist)
+    print("EBlacklist")
   }
   else{
     print("Building Bayesian Network...")
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.GD, forbid.dynamic.GG,
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
 
     if (forbid.GG & dynamic == FALSE){
@@ -180,7 +183,7 @@ build.downscalingBN <- function(data,
                                 structure.learning.args.list2 = structure.learning.args.list3,
                                 return.intermediate = return.intermediate,
                                 dynamic = dynamic, epochs = epochs, remove.past.G = remove.past.G,
-                                forbid.backwards = forbid.backwards, forbid.past.GD = forbid.past.GD,
+                                forbid.backwards = forbid.backwards, forbid.past.dynamic.GD = forbid.past.dynamic.GD,
                                 forbid.dynamic.GG = forbid.dynamic.GG, forbid.past.DD = forbid.past.DD,
                                 structure.learning.steps = structure.learning.steps,
                                 parallelize = parallelize, n.cores= n.cores, cluster.type = cluster.type,
@@ -217,7 +220,7 @@ build.downscalingBN <- function(data,
 
     if (dynamic) {dynamic.args.list <- list( epochs = epochs, remove.past.G = remove.past.G,
                                              forbid.backwards = forbid.backwards,
-                                             forbid.past.GD = forbid.past.GD,
+                                             forbid.past.dynamic.GD = forbid.past.dynamic.GD,
                                              forbid.dynamic.GG = forbid.dynamic.GG,
                                              forbid.past.DD = forbid.past.DD)}
     else {dynamic.args.list <- NULL}

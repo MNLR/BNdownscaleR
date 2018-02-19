@@ -43,7 +43,7 @@ handleLearningSteps <- function(data, structure.learning.steps, dynamic) {
       if (all(structure.learning.steps == c("local", "past-global")) | all(structure.learning.steps == c("local", "global-past"))){
         selected <- data$names.distribution[[Nepochs]]$y.names
         return( list(DATA = data$data[ , selected], POS = POS[ , (NX+1):(NX+NY)], structure.learning.steps = 1,
-                     names.distribution = list(y.names = data$names.distribution[[Nepochs]]$y.names)
+                     names.distribution = list(list(y.names = data$names.distribution[[Nepochs]]$y.names))
                      )
               )
       }
@@ -54,7 +54,7 @@ handleLearningSteps <- function(data, structure.learning.steps, dynamic) {
         selected <- data$names.distribution[[Nepochs]]$y.names
         return( list(DATA = data$data[ , selected], POS = POS[ , (NX+1):(NX+NY)],
                      structure.learning.steps = c("local-global", "past"),
-                     names.distribution = list(y.names = data$names.distribution[[Nepochs]]$y.names)
+                     names.distribution = list(list(y.names = data$names.distribution[[Nepochs]]$y.names))
                      )
                 )
       }
@@ -62,7 +62,7 @@ handleLearningSteps <- function(data, structure.learning.steps, dynamic) {
         selected <- data$names.distribution[[Nepochs]]$y.names
         return( list(DATA = data$data[ , selected], POS = POS[ , (NX+1):(NX+NY)],
                      structure.learning.steps = c("local-past", "global"),
-                     names.distribution = list(y.names = data$names.distribution[[Nepochs]]$y.names)
+                     names.distribution = list(list(y.names = data$names.distribution[[Nepochs]]$y.names))
                      )
               )
       }
