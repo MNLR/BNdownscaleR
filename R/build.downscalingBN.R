@@ -80,6 +80,7 @@ build.downscalingBN <- function(data,
                                 dynamic = FALSE, epochs = 2, remove.past.G = TRUE,
                                 forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
                                 structure.learning.steps = c("local", "global", "past"),
+                                fix.intermediate = FALSE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
                                 structure.learning.algorithm3 = NULL,
@@ -174,6 +175,9 @@ build.downscalingBN <- function(data,
   if ( steps.left >= 1){
     print("Injecting next step into the DAG...")
     whitelist <- bn$arcs
+    if (fix.intermediate){
+      structure.learning.args.list2 <- fixIntermediate(aux$names.distribution, structure.learning.args.list2, whitelist)
+    }
 
     if (is.null(structure.learning.algorithm2) ){ structure.learning.algorithm2 <- structure.learning.algorithm }
     if (steps.left == 2){ if (is.null(structure.learning.algorithm3)){ structure.learning.algorithm3 <- structure.learning.algorithm2 }}
