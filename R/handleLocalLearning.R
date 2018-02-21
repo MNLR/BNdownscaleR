@@ -4,10 +4,10 @@ handleLocalLearning <- function(data, structure.learning.args.list, dynamic, kee
   distance <- structure.learning.args.list$distance
   positions <- data$positions
   if ( !(dynamic) ){
-    node.names <- c(data$x.names, data$y.names)
+    node.names <- colnames(positions)
+    print(node.names)
     blacklist <- build.distanceBlacklist( node.names, positions, distance, exceptions = exceptions,
-                                          debug = structure.learning.args.list$debug )
-
+                                          debug = FALSE )
   }
   else if (!keep.dynamic.distance){
     to.be.Blacklisted.list <- lapply(data$names.distribution, function(x) {return(as.vector(unlist(x)))})

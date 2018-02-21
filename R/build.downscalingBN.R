@@ -28,7 +28,7 @@
 #' @param structure.learning.steps It is used to perform structure learning in up to three steps. Refer to \code{Details}.
 #' \itemize{
 #'  \item \code{1} or \code{NULL} (Default) 1 step
-#'  \item \code{2} If \code{dynamic = FALSE} learn first a DAG for D nodes, then inject G nodes. If \code{dynamic = TRUE} it
+#'  \item \code{2} or \code{c("local", "global")} If \code{dynamic = FALSE} learn first a DAG for D nodes, then inject G nodes. If \code{dynamic = TRUE} it
 #'  equals c("local-global", "past")
 #'  \item \code{3} Equals c("local", "global", "past")
 #'  \item \code{c("local-global", "past")} or \code{c("global-local", "past")} Learn first DAG for D and G nodes, then inject past nodes.
@@ -132,13 +132,16 @@ build.downscalingBN <- function(data,
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
-    if ( length(structure.learning.steps) == 1 && structure.learning.steps == 2) {
+    if ( dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 2) {
       structure.learning.steps <- c("local-global", "past")
       print(paste0("Learning process set to default dynamic 2 step:", " c(\"local-global\", \"past\")"))
     }
-    if ( length(structure.learning.steps) == 1 && structure.learning.steps == 3) {
+    if ( dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 3) {
       structure.learning.steps <- c("local", "global", "past")
       print(paste0("Learning process set to default dynamic 3 step:", " c(\"local\", \"global\", \"past\")"))
+    }
+    if ( !dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 2){
+      structure.learning.steps <- c("local", "global")
     }
 
     step.data <- handleLearningSteps(data, structure.learning.steps, dynamic)
@@ -150,12 +153,14 @@ build.downscalingBN <- function(data,
     print(paste0( c("Building intermediate DAG ", steps.left , " using " , structure.learning.algorithm, " for ", structure.learning.steps[1], " nodes", "..." ),
                   collapse = ""))
     structure.learning.steps <- step.data$structure.learning.steps
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, step.data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
-                                                          forbid.GG, forbid.DD, forbid.past.DD)
+    if (dynamic){
+      structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, step.data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
+                                                            forbid.GG, forbid.DD, forbid.past.DD)
+    }
   }
-  else{
+  else{ # Single or last step
     step.data <- NULL
-    print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ))
+    print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
 

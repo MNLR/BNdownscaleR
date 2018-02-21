@@ -29,7 +29,7 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
     axes <- FALSE
   } else { axes <- TRUE }
 
-  plotLatLonDAG( bn = DBN$BN , positions = DBN$positions, distance = DBN$bnlearning.args.list$distance,
+  plotLatLonDAG( bn = DBN$BN , positions = DBN$positions, distance = DBN$structure.learning.args.list$distance,
                        nodes = nodes, node.size = node.size, edge.arrow.size = edge.arrow.size,
                  dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
 
