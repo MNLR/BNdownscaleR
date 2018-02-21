@@ -6,7 +6,7 @@
 plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 4){
 
   if (!(is.null(DBN$dynamic.args.list))){
-    DBN$positions <- reallocateDynamicNodes(DBN$positions, break.axis, DBN$dynamic.args.list$epochs,
+    DBN$positions <- reallocateDynamicNodes(DBN$positions, names.distribution = DBN$names.distribution, break.axis, DBN$dynamic.args.list$epochs,
                                             separation.ratio = separation.ratio)
 
     sep <- attributes(DBN$positions)$separation
@@ -18,12 +18,12 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
       purge.index <- 1:nx
       aux.purge.index <- purge.index
 
-      if (epS > 2){
-        for (ep in 1:(epS-2)){
-          purge.index <- c(purge.index , aux.purge.index + (nx+ny))
-        }
-      }
-      DBN$positions <-DBN$positions[ , -purge.index]
+      #if (epS > 2){
+      #  for (ep in 1:(epS-2)){
+      #    purge.index <- c(purge.index , aux.purge.index + (nx+ny))
+      #  }
+      #}
+      #DBN$positions <-DBN$positions[ , -purge.index]
     }
 
     axes <- FALSE

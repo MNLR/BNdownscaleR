@@ -40,6 +40,9 @@ prepareDataDynamicBN <- function(data, epochs){
   data[["names.distribution"]] <- names.distribution
   data[["x.names"]] <- NULL
   data[["y.names"]] <- NULL
+  data[["positions"]] <- t(rep(1, epochs) %x% t(data$positions))
+  colnames(data$positions) <- colnames(dinamic.data)
+  rownames(data$positions) <- c("x","y")
 
   return(data)
 }

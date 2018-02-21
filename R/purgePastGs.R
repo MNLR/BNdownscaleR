@@ -1,11 +1,10 @@
 
 #' @export
 
-purgePastGs <- function(Ddata){
+purgePastGs <- function(Ddata, epS){
 
   nx <- Ddata$nx
   ny <- Ddata$ny
-  epS <- ncol(Ddata$data)/ncol(Ddata$positions)
 
   purge.index <- 1:nx
   aux.purge.index <- purge.index
@@ -19,6 +18,7 @@ purgePastGs <- function(Ddata){
 
   Ddata$names.distribution[[epS-1]]$x.names <- NULL
   Ddata$data <- Ddata$data[ , -purge.index]
+  Ddata$positions <- Ddata$positions[, -purge.index]
 
   return(Ddata)
 }

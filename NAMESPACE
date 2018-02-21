@@ -3,6 +3,7 @@
 export(build.downscalingBN)
 export(downscale.BN)
 export(handleLearningSteps)
+export(handleLocalLearning)
 export(parallel.starter)
 export(plotDBN)
 export(plotLatLonDAG)
