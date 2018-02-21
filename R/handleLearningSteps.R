@@ -7,10 +7,11 @@ handleLearningSteps <- function(data, structure.learning.steps, dynamic) {
   NY <- data$ny
 
   if (!dynamic){
-    if (length(structure.learning.steps) == 1 && structure.learning.steps == 2){
-      return( list(DATA = data$data[ , (NX+1):(NX+NY)], positions = POS[ , (NX+1):(NX+NY)], structure.learning.steps = 1) )
+    if ( all(structure.learning.steps == c("local", "global")) ){
+      return( list(DATA = data$data[ , (NX+1):(NX+NY)], names.distribution = list(y.names = data$y.names),
+                   positions = POS[ , (NX+1):(NX+NY)], structure.learning.steps = 1) )
     } else { stop("For non Dynamic Bayesian Networks use either one step learning with structure.learning.steps = 1
-                    or two step learning with structure.learning.steps = 2") }
+                    or two step learning with structure.learning.steps = 2 or structure.learning.steps = c(\"local\", \"global\")") }
   }
   else { # Dynamic Bayesian Network
 
