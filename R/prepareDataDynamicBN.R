@@ -16,8 +16,8 @@ prepareDataDynamicBN <- function(data, epochs){
   nvars <- length(names)
   layers <- rep(0, nvars)
 
-  names.distribution <- list( list(x.names = mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = data$x.names, time = rep(0, data$nx) )  ,
-                                   y.names = mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = data$y.names, time = rep(0, data$ny) ))
+  names.distribution <- list( list(x.names = as.vector(mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = data$x.names, time = rep(0, data$nx) )),
+                                   y.names = as.vector(mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = data$y.names, time = rep(0, data$ny)) ))
                             )
 
   for (epoch in 1:(epochs-1)) {
@@ -33,7 +33,7 @@ prepareDataDynamicBN <- function(data, epochs){
                                                             ))
   }
 
-  colnames(dinamic.data) <- mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = names, time = layers)
+  colnames(dinamic.data) <- mapply( FUN = function(node, time) { return(paste0(node, paste0(".T", time))) }, node = names, time = layers )
   data$data <- dinamic.data
 
   # Others

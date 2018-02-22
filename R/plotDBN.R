@@ -17,7 +17,6 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
 
       purge.index <- 1:nx
       aux.purge.index <- purge.index
-
       #if (epS > 2){
       #  for (ep in 1:(epS-2)){
       #    purge.index <- c(purge.index , aux.purge.index + (nx+ny))
@@ -33,7 +32,7 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
                        nodes = nodes, node.size = node.size, edge.arrow.size = edge.arrow.size,
                  dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
 
-  if (!(is.null(DBN$dynamic.args.list))){ # Aditional operations for dynamic:
+  if (!(is.null(DBN$dynamic.args.list))){ # Aditional operations for dynamic node placement:
     mn <- min(DBN$positions[break.axis, ])
     mx <- max(DBN$positions[break.axis, ])
     range <- abs( mx - mn )

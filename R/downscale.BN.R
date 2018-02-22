@@ -1,5 +1,5 @@
 #' @title Downscale with Bayesian Networks
-#' @param DBN Downscaling Bayesian Network, as returned by build.downscalingBN(). This is a wrapper for plot.restrictedgraph.R
+#' @param DBN Downscaling Bayesian Network, as returned by \code{build.downscalingBN()}.
 #' @author M.N. Legasa
 #' @importFrom parallel parApply stopCluster
 #' @export
@@ -19,7 +19,7 @@ downscale.BN <- function(DBN, x,
   #                     "probabilities" setting will apply.
   #                   "probabilities" returns the probabilities as a matrix where dimensions are [obs, cat, node]
   #                   "probabilities.list" returns a list of nodes with their probability tables.
-  #                     Warning: Beware of the nodes ordering if set to FALSE!
+  #                   Beware of the nodes ordering if set to FALSE!
   #
 
   x <- x$x.global

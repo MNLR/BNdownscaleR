@@ -55,7 +55,7 @@ past epochs.}
 \item{structure.learning.steps}{It is used to perform structure learning in up to three steps. Refer to \code{Details}.
 \itemize{
  \item \code{1} or \code{NULL} (Default) 1 step
- \item \code{2} If \code{dynamic = FALSE} learn first a DAG for D nodes, then inject G nodes. If \code{dynamic = TRUE} it
+ \item \code{2} or \code{c("local", "global")} If \code{dynamic = FALSE} learn first a DAG for D nodes, then inject G nodes. If \code{dynamic = TRUE} it
  equals c("local-global", "past")
  \item \code{3} Equals c("local", "global", "past")
  \item \code{c("local-global", "past")} or \code{c("global-local", "past")} Learn first DAG for D and G nodes, then inject past nodes.

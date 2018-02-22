@@ -14,7 +14,6 @@ handleLearningSteps <- function(data, structure.learning.steps, dynamic) {
                     or two step learning with structure.learning.steps = 2 or structure.learning.steps = c(\"local\", \"global\")") }
   }
   else { # Dynamic Bayesian Network
-
     Nsteps <- length(structure.learning.steps)
     Nepochs <- length(data$names.distribution)
 

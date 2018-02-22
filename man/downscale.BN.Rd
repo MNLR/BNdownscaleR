@@ -9,7 +9,7 @@ downscale.BN(DBN, x, prediction.type = "probabilities", event = "1",
   parallelize = FALSE, n.cores = NULL, cluster.type = "PSOCK")
 }
 \arguments{
-\item{DBN}{Downscaling Bayesian Network, as returned by build.downscalingBN(). This is a wrapper for plot.restrictedgraph.R}
+\item{DBN}{Downscaling Bayesian Network, as returned by \code{build.downscalingBN()}.}
 }
 \author{
 M.N. Legasa

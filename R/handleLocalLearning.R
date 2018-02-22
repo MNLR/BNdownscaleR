@@ -12,8 +12,6 @@ handleLocalLearning <- function(data, structure.learning.args.list, dynamic, kee
     to.be.Blacklisted.list <- lapply(data$names.distribution, function(x) {return(as.vector(unlist(x)))})
     blacklist.list <- lapply(to.be.Blacklisted.list,
                              FUN = function(names.per.epoch, positions, distance) {
-                                    print(names.per.epoch)
-                                    print(positions[ , names.per.epoch ])
                                     return( build.distanceBlacklist(names.per.epoch,
                                       positions = positions[ , names.per.epoch ],  distance)
                                     )

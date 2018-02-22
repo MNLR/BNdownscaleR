@@ -114,7 +114,12 @@ build.downscalingBN <- function(data,
                                 ) {
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
-  if (remove.past.G) {
+  if (dynamic && epochs == 1){
+    dynamic <- FALSE
+    print("dynamic with 1 epoch equals non dynamic.")
+  }
+
+  if (dynamic && remove.past.G) {
     forbid.dynamic.GG <- FALSE
   }
 
@@ -143,6 +148,15 @@ build.downscalingBN <- function(data,
     if ( !dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 2){
       structure.learning.steps <- c("local", "global")
     }
+    if ( !remove.past.G && (identical(structure.learning.steps, c("local-past", "global")) |
+                            identical(structure.learning.steps, c("past-local", "global")) ||
+                            identical(structure.learning.steps, c("local", "past", "global"))
+                            )   ) {stop("Use remove.past.G = TRUE to inject past nodes before G nodes.")}
+
+    if (grepl("past", structure.learning.steps[1])) {
+      int.dynamic.args.list <- list(remove.past.G = FALSE, epochs = epochs)
+    }
+    else {int.dynamic.args.list <- NULL} # marks intermediate DAGs
 
     step.data <- handleLearningSteps(data, structure.learning.steps, dynamic)
     if (is.null(step.data)) {stop("Please, use a valid structure.learning.steps option.")}
@@ -194,7 +208,7 @@ build.downscalingBN <- function(data,
     bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )
     if (!(is.null(cl))) {stopCluster(cl)} # Stops parallel cluster
   }
-  else if ( (alg == "mmhc") | (alg == "rsmax2") ) { bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )} # Non parallelizable, need cextend arc direction
+  else if ( (alg == "mmhc") | (alg == "rsmax2") ) { bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )} # Non parallelizable, needs cextend arc direction
   else { bn <-  do.call(structure.learning.algorithm, structure.learning.args.list) } # Non parallelizable, already DAG (directed)
   if (steps.left == 0){
     bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method)
@@ -235,10 +249,14 @@ build.downscalingBN <- function(data,
       #return( list(first = list(BN = bn, training.data = DATA, positions = POS,  structure.learning.args.list = structure.learning.args.list),
       #             last = DBN) )
       if (steps.left == 2){
-        DBN[["intermediateDBN2"]] <- list(BN = bn, training.data = DATA, positions = POS, structure.learning.args.list = structure.learning.args.list)
+        DBN[["intermediateDBN2"]] <- list(BN = bn, training.data = DATA, positions = POS, dynamic.args.list = int.dynamic.args.list,
+                                          names.distribution = step.data$names.distribution, NX=NX, NY=NY,
+                                          structure.learning.args.list = structure.learning.args.list)
       }
       if (steps.left == 1){
-        DBN[["intermediateDBN1"]] <- list(BN = bn, training.data = DATA, positions = POS, structure.learning.args.list = structure.learning.args.list)
+        DBN[["intermediateDBN1"]] <- list(BN = bn, training.data = DATA, positions = POS, dynamic.args.list = int.dynamic.args.list,
+                                          names.distribution = step.data$names.distribution, NX=NX, NY=NY,
+                                          structure.learning.args.list = structure.learning.args.list)
       }
       return(DBN)
     }
