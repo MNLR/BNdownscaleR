@@ -1,3 +1,4 @@
+#' @export
 auc.DBN <- function(downscaled, realData, points = 1000, plot.curves = FALSE){
   # Data must be binary
   station.names <- colnames(downscaled[1,,])

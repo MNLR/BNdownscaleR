@@ -43,10 +43,10 @@ downscale.BN <- function(DBN, x,
     #clusterExport(cl,  , envir = environment())
     #clusterExport(cl,
     PSOCK.varExports.list <- list( "junction", "predictors" , "predictands", "x")
-    PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain" , "predict.DBN")
+    PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain" , "queryJunction")
     cl <- parallel.starter(cluster.type, n.cores, PSOCK.varExports.list, PSOCK.funcExportsNames.list)
 
-    PT <- lapply(x, FUN = function (x) { parApply(cl, x, MARGIN = 1, FUN = predict.DBN,
+    PT <- lapply(x, FUN = function (x) { parApply(cl, x, MARGIN = 1, FUN = queryJunction,
                                                   predictors = predictors, junction = junction , predictands = predictands
                                                   )
                                         }
@@ -54,7 +54,7 @@ downscale.BN <- function(DBN, x,
     stopCluster(cl)
   }
   else { # Do not parallelize
-    PT <- lapply( x, FUN = function (x) {apply(x, MARGIN = 1, FUN =  predict.DBN,
+    PT <- lapply( x, FUN = function (x) {apply(x, MARGIN = 1, FUN =  queryJunction,
                                                predictors = predictors, junction = junction , predictands = predictands
                                                )
                                         }
