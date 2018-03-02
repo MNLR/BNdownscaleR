@@ -4,9 +4,10 @@
 \alias{plotLatLonDAG}
 \title{Plot a Graph placing nodes in euclidean coordinates \code{positions}}
 \usage{
-plotLatLonDAG(bn, positions, distance = NULL, nodes = -1, node.size = 4,
-  edge.arrow.size = 0.15, dev = FALSE, axes = TRUE, xlab = "x",
-  ylab = "y")
+plotLatLonDAG(bn, positions, distance = NULL, nodes = -1,
+  no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
+  node.size = 4, edge.width = 0.5, edge.arrow.size = 0.15, dev = FALSE,
+  axes = TRUE, xlab = "x", ylab = "y")
 }
 \author{
 M.N. Legasa

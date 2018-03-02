@@ -1,32 +1,12 @@
 #' @export
 
-phiCoef <- function( data, st1, st2, remove.nan =  TRUE, evidence.nodes = NULL, evidence = NULL){
+phiCoef <- function( data, st1, st2, remove.na =  TRUE, evidence.nodes = NULL, evidence = NULL ){
 
-  Data <- data$Data
+  if (length(evidence.nodes) != length(evidence)) {stop("Provide a single evidence for every node.")}
+  Data <- filterData(data, st1, st2, remove.na, evidence.nodes, evidence)
 
-  node.names <- data$Metadata$station_id
-  if (is.character(st1)){ st1<- which(node.names == st1) }
-  if (is.character(st2)){ st2<- which(node.names == st2) }
-  if (!is.null(evidence.nodes)){
-    for (i in 1:length(evidence.nodes)){
-      if (is.character(evidence.nodes[i])){
-        evidence.nodes[i] <- which(node.names == evidence.nodes[i])
-      }
-    }
-    evidence.nodes <- as.numeric(evidence.nodes)
-  }
-
-  if (remove.nan){ Data <- Data[complete.cases(Data), ] }
-
-  if (!is.null(evidence.nodes)){
-    for (i in 1:length(evidence.nodes)){
-      Data <- Data[ which(Data[ , evidence.nodes[i]] == evidence[i] ) ,  ]
-    }
-  }
-
-  Data <- Data[ , c(st1, st2)]
-
-
+  ## Phi coefficient equals Pearson for binary variables.
+  if (nrow(Data) <= 1) {stop("Less than 1 case matched the evidence.")}
   n11 <- as.numeric(table(Data[ ,1] == 1 & Data[ ,2] == 1)["TRUE"])
   if (is.na(n11)) {n11 <- 0}
   n00 <- as.numeric(table(Data[ ,1] == 0 & Data[ ,2] == 0)["TRUE"])
@@ -41,5 +21,8 @@ phiCoef <- function( data, st1, st2, remove.nan =  TRUE, evidence.nodes = NULL, 
   n_1 <- as.numeric(table(Data[ ,2] == 1)["TRUE"])
   n_0 <- as.numeric(table(Data[ ,2] == 0)["TRUE"])
 
-  return( (n11*n00 - n10*n01)/(sqrt(n1_)*sqrt(n0_)*sqrt(n_1)*sqrt(n_0)) )
+  phi <- (n11*n00 - n10*n01)/(sqrt(n1_)*sqrt(n0_)*sqrt(n_1)*sqrt(n_0))
+  attr(phi, 'cases') <- nrow(Data)
+
+  return( phi )
 }

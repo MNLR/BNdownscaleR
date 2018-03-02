@@ -5,7 +5,8 @@
 #' @importFrom shape plotellipse
 #' @export
 #'
-plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, node.size = 4,   edge.arrow.size = 0.15 ,dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
+plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
+                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15 ,dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
   # Plots the graph of class bn with nodes in positions and shows the nodes dependance distance as a circle, for a given distance d assumed to be euclidean distance.
   #  ---- INPUT:
   # graph             An object of class bn whose Directed Acyclic Graph is going to be plotted.
@@ -37,19 +38,32 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, node.size 
   NodeList <- data.frame(nodes_, positions[1, ] , positions[2, ])
   EdgeList <- data.frame(bn$arcs)
   a <- graph_from_data_frame(vertices = NodeList, d = EdgeList)
-  color <- c("red", "blue", "green", "yellow", "brown", "black", "pink", "cyan")
-  color <- array( color, Nnodes)
+
 
   if (length(nodes) == 1 && nodes == 0){
     nodes <- seq(1, Nnodes)
   }
+  if (!no.colors){
+    color <- c("red", "blue", "green", "yellow", "brown", "black", "pink", "cyan")
+    color <- array( color, Nnodes)
+    COL <-color[nodes]
+  } else {COL <- "black"}
   if ( (length(nodes) == 1 && nodes != -1) | (length(nodes) != 1) ) {
     cpositions <- as.matrix(positions[ ,nodes] )
   }
 
-  plot.igraph(a, layout=t(positions), vertex.size = node.size, vertex.color=color,  rescale=F,  xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes , edge.arrow.size = edge.arrow.size)
+  if (no.labels){ plot.igraph(a, layout=t(positions),
+                              vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, vertex.label=NA,  rescale=F,
+                              xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes,
+                              edge.width = edge.width, edge.arrow.size = edge.arrow.size)
+  } else { plot.igraph(a, layout=t(positions),
+                       vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, rescale=F,
+                       xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes,
+                       edge.width = edge.width, edge.arrow.size = edge.arrow.size)
+  }
+
   if ( (length(nodes) == 1 && (nodes != -1 & !(is.null(distance))) ) | ( length(nodes) != 1 & !(is.null(distance)) )  ) {
-    trash <- mapply(plotellipse, mid = split(cpositions, rep(1:ncol(cpositions), each = nrow(cpositions))), lcol = color[nodes] , MoreArgs = list( rx = distance, ry = distance, asp = FALSE))
+    trash <- mapply(plotellipse, mid = split(cpositions, rep(1:ncol(cpositions), each = nrow(cpositions))), lcol = COL , MoreArgs = list( rx = distance, ry = distance, asp = FALSE))
   }
 
 }

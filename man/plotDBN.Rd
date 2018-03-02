@@ -4,8 +4,10 @@
 \alias{plotDBN}
 \title{Plot Bayesian Network}
 \usage{
-plotDBN(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25,
-  break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 4)
+plotDBN(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALSE,
+  vertex.label.dist = 0.05, no.colors = NULL, node.size = 3,
+  edge.width = 0.6, edge.arrow.size = 0.2, break.axis = 1,
+  separation.ratio = 0.1, Nlabels = 4)
 }
 \arguments{
 \item{DBN}{Downscaling Bayesian Network, as returned by build.downscalingBN().}

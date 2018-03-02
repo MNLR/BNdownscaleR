@@ -3,7 +3,9 @@
 #' @author M.N. Legasa
 #' @export
 
-plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, break.axis = 1, separation.ratio = 0.1, dev = FALSE, Nlabels = 4){
+plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALSE, vertex.label.dist = 0.05,
+                    no.colors = NULL, node.size = 3,  edge.width = 0.6, edge.arrow.size = 0.2,
+                    break.axis = 1, separation.ratio = 0.1, Nlabels = 4){
 
   if (!(is.null(DBN$dynamic.args.list))){
     DBN$positions <- reallocateDynamicNodes(DBN$positions, names.distribution = DBN$names.distribution, break.axis, DBN$dynamic.args.list$epochs,
@@ -28,10 +30,17 @@ plotDBN <- function(DBN, nodes = -1, node.size = 1, edge.arrow.size = 0.25, brea
     axes <- FALSE
   } else { axes <- TRUE }
 
-  plotLatLonDAG( bn = DBN$BN , positions = DBN$positions, distance = DBN$structure.learning.args.list$distance,
-                       nodes = nodes, node.size = node.size, edge.arrow.size = edge.arrow.size,
-                 dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
+  if (is.null(no.colors)) { if (length(nodes) == 1 && nodes == -1) {no.colors <- TRUE} else {no.colors <- FALSE} }
 
+  plotLatLonDAG( bn = DBN$BN, positions = DBN$positions, distance = DBN$structure.learning.args.list$distance, vertex.label.dist = vertex.label.dist,
+                       nodes = nodes, node.size = node.size, no.colors = no.colors, no.labels = no.labels, edge.width = edge.width, edge.arrow.size = edge.arrow.size,
+                 dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
+  if (!is.null(title)) {title(title)} else {
+    if (is.null(DBN$structure.learning.args.list$distance)) { ds <- ""} else {
+      ds <- paste0("d=",as.character(DBN$structure.learning.args.list$distance))}
+    title( paste0(list(DBN$BN$learning$algo, ds)) )
+
+  }
   if (!(is.null(DBN$dynamic.args.list))){ # Aditional operations for dynamic node placement:
     mn <- min(DBN$positions[break.axis, ])
     mx <- max(DBN$positions[break.axis, ])
