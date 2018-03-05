@@ -8,7 +8,8 @@ Depends:
 Imports:
     igraph,
     shape,
-    parallel
+    parallel,
+    infotheo
 Suggests:
     loadeR
 Type: Package

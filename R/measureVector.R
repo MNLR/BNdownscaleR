@@ -1,6 +1,6 @@
 #' @export
 
-dependenceVector <- function(data, station, measure = "phiCoef", ... ){  #remove.na = TRUE, evidence.nodes = NULL, evidence = NULL) {
+measureVector <- function(data, station, measure = "phiCoef", ... ){  #remove.na = TRUE, evidence.nodes = NULL, evidence = NULL) {
 
   dS <- c()
   casesS <- c()
@@ -13,7 +13,5 @@ dependenceVector <- function(data, station, measure = "phiCoef", ... ){  #remove
   attr(dS, "measure") <- measure
   return(dS)
 }
-
-
 
 #phiCoef <- function( data, st1, st2, remove.nan =  TRUE, evidence.nodes = NULL, evidence = NULL){
