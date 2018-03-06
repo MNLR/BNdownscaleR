@@ -5,6 +5,7 @@ Depends:
     downscaleR,
     gRain,
     sfsmisc,
+    abind
 Imports:
     igraph,
     shape,

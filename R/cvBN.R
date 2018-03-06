@@ -9,7 +9,7 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
   data <- dataSplit(x,y, f = folds, type = type)
 
   p <- lapply(1:length(data), FUN = function(xx) {
-    print(paste0("Fold:", xx ,"... "))
+    print(paste0("Fold ", xx ,"... "))
     xT <- data[[xx]]$train$x ; yT <- data[[xx]]$train$y
     xt <- data[[xx]]$test$x  ; yt <- data[[xx]]$test$y
 
@@ -49,5 +49,5 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
   prob <- lapply(prob, FUN = function(member) {do.call(abind, args = list(member, along = 1))} )
   event <- lapply(event, FUN = function(member) {do.call(rbind, member)} )
 
-  return(list(prob = prob, event = event))
+  return(list(prob = prob, event = event, real = y))
   }

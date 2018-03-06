@@ -1,5 +1,5 @@
 #' @export
-auc.DBN <- function(downscaled, realData, points = 1000, plot.curves = FALSE){
+auc.DBN <- function(downscaled, realData, points = 100, plot.curves = TRUE){
   # Data must be binary
   station.names <- colnames(downscaled[1,,])
   aucS <- array(0, NCOL(realData))
