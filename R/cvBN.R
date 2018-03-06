@@ -1,6 +1,6 @@
 #' @export
 
-cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NULL, event = "1",
+cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NULL, plot.DBN = TRUE, event = "1",
                  scale = FALSE, global.vars = NULL, PCA = NULL, combined.only = TRUE, local.predictors = NULL,
                  ...) {
 
@@ -23,6 +23,9 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
     xt <- prepare_newdata(newdata = xt, predictor = grid)
     model <- build.downscalingBN(xT, ...)
 
+    if (plot.DBN){
+      plotDBN(model)
+    }
     #predx <- getTemporalIntersection(obs = y, prd = x, which.return = "prd")
     #ty <- getTemporalIntersection(obs = y, prd = x, which.return = "obs")
     #test <- prepare_newdata(newdata = predx,
