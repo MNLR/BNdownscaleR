@@ -4,7 +4,4 @@ main.R
 things.R
 man/hello.Rd
 exampleplots/*
-testScoreDistance.R
-testPrediction.R
-testDescriptive.R
-testphiCoef.R
+test*
