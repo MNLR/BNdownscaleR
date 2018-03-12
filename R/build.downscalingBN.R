@@ -102,7 +102,7 @@ build.downscalingBN <- function(data,
                                 dynamic = FALSE, epochs = 2, remove.past.G = TRUE, keep.dynamic.distance = TRUE,
                                 forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
                                 structure.learning.steps = 1,
-                                fix.intermediate = FALSE,
+                                fix.intermediate = TRUE,
                                 structure.learning.algorithm2 = NULL,
                                 structure.learning.args.list2 = list(),
                                 structure.learning.algorithm3 = NULL,
@@ -246,8 +246,6 @@ build.downscalingBN <- function(data,
                                 param.learning.method = param.learning.method
                                 )
     if (return.intermediate){
-      #return( list(first = list(BN = bn, training.data = DATA, positions = POS,  structure.learning.args.list = structure.learning.args.list),
-      #             last = DBN) )
       if (steps.left == 2){
         DBN[["intermediateDBN2"]] <- list(BN = bn, training.data = DATA, positions = POS, dynamic.args.list = int.dynamic.args.list,
                                           names.distribution = step.data$names.distribution, NX=NX, NY=NY,

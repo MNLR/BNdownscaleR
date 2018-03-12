@@ -12,10 +12,10 @@ auc <- function(probabilities, name, real, event = 1, not.event = 0,  points = 1
     real[real == not.event] <- 0
     occurence[occurence == not.event ] <- 0
   }
-  ctables <- lapply( occurence ,  c.table, real = real)
+  ctables <- lapply( occurence ,  cTable, real = real)
 
-  roc.xvalues <- rev( sapply( ctables, c.table.rates, value = "FPR" ) )
-  roc.yvalues <- rev( sapply( ctables, c.table.rates, value = "TPR" ) )
+  roc.xvalues <- rev( sapply( ctables, cTableRates, value = "FPR" ) )
+  roc.yvalues <- rev( sapply( ctables, cTableRates, value = "TPR" ) )
 
   auc <- integrate.xy(roc.xvalues ,  roc.yvalues, use.spline = FALSE)
   if (plot.curve){

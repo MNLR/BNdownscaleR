@@ -3,12 +3,30 @@
 cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NULL, plot.DBN = TRUE, return.model = FALSE,
                  event = "1", scale = FALSE, global.vars = NULL, PCA = NULL, combined.only = TRUE, local.predictors = NULL,
                  ...) {
+  preNAy <- length(y$Dates$start)
+  preNAx <- length(x$Dates$start)
+  y <- filterNA(y)
+  x <- filterNA(x)
+  if (preNAy != length(y$Dates$start)){
+    warning(
+      paste0(list(as.character(preNAy - length(y$Dates$start)),
+                  " observations with NA values have been removed from y. ",
+                  length(y$Dates$start), " left.")), immediate. = TRUE
+      )
+  }
+  if (preNAx != length(x$Dates$start)){
+    warning(
+      paste0(list(as.character(preNAx - length(x$Dates$start)),
+                  " observations with NA values have been removed from x. ",
+                  length(x$Dates$start), " left." )), immediate. = TRUE
+      )
+  }
 
-  y <- getTemporalIntersection(obs = y,prd = x, "obs" )
-  x <- getTemporalIntersection(obs = y,prd = x, "prd" )
+  y <- getTemporalIntersection(obs = y, prd = x, "obs" )
+  x <- getTemporalIntersection(obs = y, prd = x, "prd" )
   data <- dataSplit(x,y, f = folds, type = type)
 
-  p <- lapply(1:length(data), FUN = function(xx, return.model) {
+  p <- lapply(1:length(data), FUN = function(xx, return.model, ...) {
       print(paste0("Fold ", xx ,"... "))
       xT <- data[[xx]]$train$x ; yT <- data[[xx]]$train$y
       xt <- data[[xx]]$test$x  ; yt <- data[[xx]]$test$y
@@ -35,7 +53,7 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
       if (return.model){
         return(list(prob = prob.py, event = event.py, model = model))
       } else { return(list(prob = prob.py, event = event.py)) }
-    }, return.model = return.model
+    }, return.model = return.model, ... = ...
   )
 
   probS <- lapply(p, FUN = function(x) {return(x$prob)} )

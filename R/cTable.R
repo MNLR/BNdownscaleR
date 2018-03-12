@@ -1,4 +1,6 @@
-c.table <- function(predicted, real){
+#' @export
+
+cTable <- function(predicted, real){
   real <- matrix(as.numeric(real), ncol = NCOL(real) )
   predicted <-matrix(as.numeric(predicted), ncol = NCOL(predicted) )
   ct1 <- table( predicted - 2*real)
@@ -8,6 +10,6 @@ c.table <- function(predicted, real){
   colnames(CT) <- c("w0", "w1")
   rownames(CT) <- c("p0", "p1")
   CT[is.na(CT)] <- 0
-  
+
   return(CT)
 }

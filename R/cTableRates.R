@@ -1,4 +1,6 @@
-c.table.rates <- function(c.table, value = "all" ){
+#' @export
+
+cTableRates <- function(c.table, value = "all" ){
   switch(value,
          TPR = { return( c.table[2,2]/(c.table[2,2]+c.table[1,2]) ) },
          FPR = { return( c.table[2,1]/(c.table[2,1]+c.table[1,1]) ) },

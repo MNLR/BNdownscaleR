@@ -1,6 +1,8 @@
 #' @export
-measureMatrix <- function( data , measure = "phiCoef", mark.diagonal.na = TRUE, ...){
-
+measureMatrix <- function( data , measure = "phiCoef", mark.diagonal.na = TRUE, ... ){
+  if (is.matrix(data)){
+    data <- list(Data = data)
+  }
   mS <- matrix(0, nrow = ncol(data$Data), ncol = ncol(data$Data))
   for (i in 1:nrow(mS)){
     mS[i, ] <- measureVector(data = data, station = i, measure = measure, ...)

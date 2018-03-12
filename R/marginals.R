@@ -1,3 +1,5 @@
+#' @export
+
 marginals <- function(dbn, junction = NULL){
   BN <- dbn$BN
   BN.fit <- dbn$BN.fit
@@ -10,7 +12,7 @@ marginals <- function(dbn, junction = NULL){
     junction <- compile( as.grain(BN.fit) )
   }
 
-  MPT <- simplify2array(querygrain(junction, nodes = predictands))
+  MPT <-sapply(predictands, function(pred, junction) {querygrain(junction, nodes = pred)[[1]]}, junction = junction)
 
-  return( MPT[ ,match(predictands, colnames(MPT))] )
+  return( MPT )
 }
