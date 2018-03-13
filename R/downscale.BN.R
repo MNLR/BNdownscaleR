@@ -8,7 +8,7 @@
 downscale.BN <- function(DBN, x,
                          prediction.type = "probabilities", event = "1", threshold.vector = NULL,
                          output.attr.evidence = FALSE,
-                         parallelize = FALSE, n.cores = NULL , cluster.type = "PSOCK"){
+                         cl = NULL, stop.cluster = FALSE, parallelize = FALSE, n.cores = NULL , cluster.type = "FORK"){
 
   # Parallelize = TRUE should reduce computation times significantly when lots of evidences are provided.
   # cluster.type    Accepts "PSOCK" and "FORK". "FORK" cannot be used in Windows systems.
@@ -44,14 +44,15 @@ downscale.BN <- function(DBN, x,
     #clusterExport(cl,
     PSOCK.varExports.list <- list( "junction", "predictors" , "predictands", "x")
     PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain" , "queryJunction")
-    cl <- parallel.starter(cluster.type, n.cores, PSOCK.varExports.list, PSOCK.funcExportsNames.list)
+
+    cl <- parallelHandler(cluster.type, n.cores, PSOCK.varExports.list, PSOCK.funcExportsNames.list, cl)
 
     PT <- lapply(x, FUN = function (x) { parApply(cl, x, MARGIN = 1, FUN = queryJunction,
                                                   predictors = predictors, junction = junction , predictands = predictands
                                                   )
                                         }
                 )
-    stopCluster(cl)
+    if (stop.cluster) { stopCluster(cl) }
   }
   else { # Do not parallelize
     PT <- lapply( x, FUN = function (x) {apply(x, MARGIN = 1, FUN =  queryJunction,

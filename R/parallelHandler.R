@@ -4,19 +4,21 @@
 #' @importFrom parallel detectCores makeCluster
 #' @export
 
-parallel.starter <- function(type, n.cores,
+parallelHandler <- function(type, n.cores,
                              PSOCK.funcExports.list = list(),
-                             PSOCK.varExports.list = list()){
+                             PSOCK.varExports.list = list(),
+                             cl = NULL){
 
-  if ( is.null(n.cores) ){
-    n.cores <- floor(detectCores()-1)
+  if (is.null(cl)){   # Initiate cluster, if not already
+    if ( is.null(n.cores) ){
+      n.cores <- floor(detectCores()-1)
+    }
+    print("Starting cluster for parallel computation...")
+    cl <- makeCluster( n.cores, type = type )
   }
 
-  # Initiate cluster
-  print("Starting cluster for parallel computation...")
-  cl <- makeCluster( n.cores, type = type )
-
   if (type == "PSOCK") {
+    print("Exporting data to PSOCK cluster...")
     #PSOCK.varExportsNames.list = list()
     #for ( i in 1:length(PSOCK.varExports.list) ) {
     #  PSOCK.varExportsNames.list[[i]] <- deparse(quote( PSOCK.varExports.list[[i]] ))
@@ -25,9 +27,6 @@ parallel.starter <- function(type, n.cores,
     print(PSOCK.exports)
     clusterExport(cl, PSOCK.exports, envir = environment())
   }
-
   print("Cluster good to go.")
-
   return(cl)
-}
-
+  }

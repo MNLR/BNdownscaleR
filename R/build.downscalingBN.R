@@ -110,7 +110,7 @@ build.downscalingBN <- function(data,
                                 return.intermediate = FALSE,
                                 output.marginals = TRUE,
                                 compile.junction = TRUE,
-                                parallelize = FALSE, n.cores= NULL, cluster.type = "PSOCK"
+                                parallelize = FALSE, n.cores= NULL, cluster.type = "FORK"
                                 ) {
 
   if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
@@ -175,9 +175,10 @@ build.downscalingBN <- function(data,
   else{ # Single or last step
     step.data <- NULL
     print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
-    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
+    if (dynamic){  # MARKED FOR REVIEW; SHOULD SOMETHING FAIL
+      structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
-
+    }
     if (forbid.GG & dynamic == FALSE){
       globalNodeNames <- data$x.names
       structure.learning.args.list <- add.toBlacklist(globalNodeNames, structure.learning.args.list)
@@ -202,7 +203,7 @@ build.downscalingBN <- function(data,
   if ( (alg == "gs") | (alg == "iamb") | (alg == "fast")  | (alg == "inter") | (alg == "inter")  | (alg == "pc") ) { # Constraint based, parallelizable
     cl <- NULL
     if ( parallelize ) { # constraint-based algorithms allow parallelization
-      cl <- parallel.starter(cluster.type, n.cores)
+      cl <- parallelHandler(cluster.type, n.cores)
       structure.learning.args.list[["cluster"]] <- cl
     }
     bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )

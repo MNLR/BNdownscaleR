@@ -5,8 +5,9 @@
 \title{Downscale with Bayesian Networks}
 \usage{
 downscale.BN(DBN, x, prediction.type = "probabilities", event = "1",
-  threshold.vector = NULL, output.attr.evidence = FALSE,
-  parallelize = FALSE, n.cores = NULL, cluster.type = "PSOCK")
+  threshold.vector = NULL, output.attr.evidence = FALSE, cl = NULL,
+  stop.cluster = FALSE, parallelize = FALSE, n.cores = NULL,
+  cluster.type = "FORK")
 }
 \arguments{
 \item{DBN}{Downscaling Bayesian Network, as returned by \code{build.downscalingBN()}.}

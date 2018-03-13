@@ -16,7 +16,7 @@ build.downscalingBN(data, structure.learning.algorithm = "hc",
   structure.learning.algorithm3 = NULL,
   structure.learning.args.list3 = list(), return.intermediate = FALSE,
   output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
-  n.cores = NULL, cluster.type = "PSOCK")
+  n.cores = NULL, cluster.type = "FORK")
 }
 \arguments{
 \item{data}{Expects output from \code{\link[BNdownscaleR]{prepare_predictors.forBN}}.}

@@ -2,6 +2,7 @@
 
 cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NULL, plot.DBN = TRUE, return.model = FALSE,
                  event = "1", scale = FALSE, global.vars = NULL, PCA = NULL, combined.only = TRUE, local.predictors = NULL,
+                 cl = NULL,
                  ...) {
   preNAy <- length(y$Dates$start)
   preNAx <- length(x$Dates$start)
@@ -45,7 +46,7 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
         plotDBN(model)
       }
 
-      prob.py <- downscale.BN(DBN = model, x = xt, prediction.type = "probabilities", parallelize = TRUE, cluster.type = "FORK")
+      prob.py <- downscale.BN(DBN = model, x = xt, prediction.type = "probabilities", parallelize = TRUE, cl = cl, cluster.type = "FORK")
 
       if (is.null(threshold.vector)){ threshold.vector  <- 1 - model$marginals[event, ] }
       event.py <- lapply(prob.py, FUN = is.mostLikely, event = event, threshold.vector =  threshold.vector)

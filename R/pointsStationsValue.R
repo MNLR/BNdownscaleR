@@ -1,7 +1,7 @@
 #' @export
 
 pointsStationsValue <- function(y, valueS, numeric.values = FALSE, node.idS = FALSE, color.ramp.palette = c('red', 'green'), na.color = "black",
-                              show.legend = TRUE, legend.breaks = 6, legend.loc = "topright", pch = 20, cex = 5, dev = TRUE) {
+                              show.legend = FALSE, legend.breaks = 6, legend.loc = "topright", pch = 20, cex = 5, dev = TRUE) {
   if (nrow(y$xyCoords) != length(valueS)) { stop("valueS must have a single value per each station.") }
 
   #Create a function to generate a continuous color palette
