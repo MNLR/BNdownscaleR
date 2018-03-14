@@ -1,6 +1,6 @@
 #' @export
 measureMatrix <- function( data , measure = "phiCoef", mark.diagonal.na = TRUE, ... ){
-  if (is.matrix(data)){
+  if (is.matrix(data) | is.data.frame(data)){
     data <- list(Data = data)
   }
   mS <- matrix(0, nrow = ncol(data$Data), ncol = ncol(data$Data))
