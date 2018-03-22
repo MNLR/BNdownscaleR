@@ -1,12 +1,8 @@
 
 addtoBlacklistDynamic <- function(structure.learning.args.list, names.distribution,
                                   forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG, forbid.GG, forbid.DD, forbid.past.DD){
-  if ( is.null(structure.learning.args.list$blacklist) ){
-    blacklist <- matrix(, nrow = 0, ncol = 2)
-    colnames(blacklist) <- c("from", "to")
-    structure.learning.args.list[["blacklist"]] <-  blacklist
-  }
 
+  structure.learning.args.list <- initializeDummyGreylist(structure.learning.args.list, "blacklist")
   epochs <- length(names.distribution)
 
   if (forbid.backwards & epochs >= 2) {

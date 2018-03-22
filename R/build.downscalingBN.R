@@ -98,7 +98,7 @@ build.downscalingBN <- function(data,
                                 structure.learning.algorithm = "hc",
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
-                                forbid.GG = TRUE, forbid.DD = FALSE,
+                                forbid.GG = TRUE, forbid.DD = FALSE, forbid.DtoG = TRUE,
                                 dynamic = FALSE, epochs = 2, remove.past.G = TRUE, keep.dynamic.distance = TRUE,
                                 forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
                                 structure.learning.steps = 1,
@@ -176,6 +176,7 @@ build.downscalingBN <- function(data,
     step.data <- NULL
     print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
     if (dynamic){  # MARKED FOR REVIEW; SHOULD SOMETHING FAIL
+      # WARNING: addtoBlacklistDynamic() has yet forbid.DtoG to be implemented
       structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list, data$names.distribution, forbid.backwards, forbid.past.dynamic.GD, forbid.dynamic.GG,
                                                           forbid.GG, forbid.DD, forbid.past.DD)
     }
@@ -186,6 +187,11 @@ build.downscalingBN <- function(data,
     if (forbid.DD & dynamic == FALSE){
       localNodeNames <- data$y.names
       structure.learning.args.list <- add.toBlacklist(localNodeNames, structure.learning.args.list)
+    }
+    if (forbid.DtoG & dynamic == FALSE){
+      structure.learning.args.list <- initializeDummyGreylist( structure.learning.args.list, "blacklist" )
+      structure.learning.args.list$blacklist <- rbind(structure.learning.args.list$blacklist,
+                                                      buildBlacklist(data$y.names, data$x.names, bidirectional = FALSE))
     }
     DATA <- data$data
   }
@@ -230,8 +236,7 @@ build.downscalingBN <- function(data,
     else{ rbind(whitelist, structure.learning.args.list2$whitelist) }
 
     DBN <-  build.downscalingBN(data,
-                                forbid.GG = forbid.GG,
-                                forbid.DD = forbid.DD,
+                                forbid.GG = forbid.GG, forbid.DD = forbid.DD, forbid.DtoG = forbid.DtoG,
                                 structure.learning.algorithm = structure.learning.algorithm2,
                                 structure.learning.args.list = structure.learning.args.list2,
                                 structure.learning.algorithm2 = structure.learning.algorithm3,
@@ -298,5 +303,3 @@ build.downscalingBN <- function(data,
           )
   }
 }
-
-
