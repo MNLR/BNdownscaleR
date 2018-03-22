@@ -1,7 +1,6 @@
 #' @export
 
 measureVector <- function(data, station, measure = "phiCoef", ... ){  #remove.na = TRUE, evidence.nodes = NULL, evidence = NULL) {
-
   dS <- c()
   casesS <- c()
   for (j in 1:42){
@@ -13,5 +12,3 @@ measureVector <- function(data, station, measure = "phiCoef", ... ){  #remove.na
   attr(dS, "measure") <- measure
   return(dS)
 }
-
-#phiCoef <- function( data, st1, st2, remove.nan =  TRUE, evidence.nodes = NULL, evidence = NULL){

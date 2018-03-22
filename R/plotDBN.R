@@ -5,6 +5,7 @@
 
 plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALSE, vertex.label.dist = 0.05,
                     no.colors = NULL, node.size = 3,  edge.width = 0.6, edge.arrow.size = 0.2,
+                    color.edges = TRUE, color.edges.color = c("red", "blue"),
                     break.axis = 1, separation.ratio = 0.1, Nlabels = 4){
 
   if (!(is.null(DBN$dynamic.args.list))){
@@ -33,7 +34,8 @@ plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
   if (is.null(no.colors)) { if (length(nodes) == 1 && nodes == -1) {no.colors <- TRUE} else {no.colors <- FALSE} }
 
   plotLatLonDAG( bn = DBN$BN, positions = DBN$positions, distance = DBN$structure.learning.args.list$distance, vertex.label.dist = vertex.label.dist,
-                       nodes = nodes, node.size = node.size, no.colors = no.colors, no.labels = no.labels, edge.width = edge.width, edge.arrow.size = edge.arrow.size,
+                 nodes = nodes, node.size = node.size, no.colors = no.colors, no.labels = no.labels, edge.width = edge.width, edge.arrow.size = edge.arrow.size,
+                 color.edges = color.edges, color.edges.color = color.edges.color,
                  dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
   if (!is.null(title)) {title(title)} else {
     if (is.null(DBN$structure.learning.args.list$distance)) { ds <- ""} else {

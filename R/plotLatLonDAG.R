@@ -6,7 +6,8 @@
 #' @export
 #'
 plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
-                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15 ,dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
+                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15, color.edges = TRUE, color.edges.color = c("gray", "black"),
+                          dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
   # Plots the graph of class bn with nodes in positions and shows the nodes dependance distance as a circle, for a given distance d assumed to be euclidean distance.
   #  ---- INPUT:
   # graph             An object of class bn whose Directed Acyclic Graph is going to be plotted.
@@ -39,7 +40,6 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
   EdgeList <- data.frame(bn$arcs)
   a <- graph_from_data_frame(vertices = NodeList, d = EdgeList)
 
-
   if (length(nodes) == 1 && nodes == 0){
     nodes <- seq(1, Nnodes)
   }
@@ -52,13 +52,19 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
     cpositions <- as.matrix(positions[ ,nodes] )
   }
 
+  if (color.edges) {
+    G.edges <- unique(c(grep(pattern = "G", EdgeList[, 1]) , grep(pattern = "G", EdgeList[, 2])))
+    edge.color <- rep(color.edges.color[2], nrow(EdgeList))
+    edge.color[G.edges] <- color.edges.color[1]
+  }
+
   if (no.labels){ plot.igraph(a, layout=t(positions),
-                              vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, vertex.label=NA,  rescale=F,
+                              vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, vertex.label=NA,  rescale=F, edge.color = edge.color,
                               xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes,
                               edge.width = edge.width, edge.arrow.size = edge.arrow.size)
   } else { plot.igraph(a, layout=t(positions),
-                       vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, rescale=F,
-                       xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes,
+                       vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, rescale=F, edge.color = edge.color,
+                       xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp = FALSE , axes = axes,
                        edge.width = edge.width, edge.arrow.size = edge.arrow.size)
   }
 
