@@ -6,7 +6,7 @@
 #' @export
 #'
 plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
-                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15, color.edges = TRUE, color.edges.color = c("gray", "black"),
+                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15, edges.color = c("gray", "black"),
                           dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
   # Plots the graph of class bn with nodes in positions and shows the nodes dependance distance as a circle, for a given distance d assumed to be euclidean distance.
   #  ---- INPUT:
@@ -52,18 +52,35 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
     cpositions <- as.matrix(positions[ ,nodes] )
   }
 
-  if (color.edges) {
-    G.edges <- unique(c(grep(pattern = "G", EdgeList[, 1]) , grep(pattern = "G", EdgeList[, 2])))
-    edge.color <- rep(color.edges.color[2], nrow(EdgeList))
-    edge.color[G.edges] <- color.edges.color[1]
+  if (!is.null(edges.color)) {
+    Nedges <- nrow(EdgeList)
+    GtoD <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "D", EdgeList[, 2]) )
+    DtoG <- intersect(grep(pattern = "D", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
+    GtoG <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
+
+    edge.color.pattern <- rep(edges.color[1], Nedges)
+    if (length(edges.color) == 2) {
+      edge.color.pattern[c(GtoD, DtoG, GtoG)] <- edges.color[2]
+    }
+    else if (length(edges.color) == 3){
+      edge.color.pattern[c(GtoD, DtoG)] <- edges.color[2]
+      edge.color.pattern[c(GtoG)] <- edges.color[3]
+    }
+    else if (length(edges.color) >= 4){
+      edge.color.pattern[GtoD] <- edges.color[2]
+      edge.color.pattern[DtoG] <- edges.color[3]
+      edge.color.pattern[c(GtoG)] <- edges.color[4]
+    }
   }
 
   if (no.labels){ plot.igraph(a, layout=t(positions),
-                              vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, vertex.label=NA,  rescale=F, edge.color = edge.color,
+                              vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, vertex.label=NA,  rescale=F,
+                              edge.color = edge.color.pattern,
                               xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp=FALSE , axes = axes,
                               edge.width = edge.width, edge.arrow.size = edge.arrow.size)
   } else { plot.igraph(a, layout=t(positions),
-                       vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, rescale=F, edge.color = edge.color,
+                       vertex.size = node.size, vertex.label.dist = vertex.label.dist, vertex.color=COL, rescale=F,
+                       edge.color = edge.color.pattern,
                        xlim=c(minx, maxx), ylim=c(miny, maxy), xlab = xlab, ylab = ylab, asp = FALSE , axes = axes,
                        edge.width = edge.width, edge.arrow.size = edge.arrow.size)
   }
@@ -73,3 +90,4 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
   }
 
 }
+

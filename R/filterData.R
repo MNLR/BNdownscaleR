@@ -1,7 +1,6 @@
 
 filterData <- function(data, st1, st2, remove.na, evidence.nodes, evidence){
   Data <- data$Data
-
   node.names <- data$Metadata$station_id
 
   if (is.character(evidence.nodes) && is.null(node.names) ){
