@@ -137,21 +137,8 @@ build.downscalingBN <- function(data,
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
-    if ( dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 2) {
-      structure.learning.steps <- c("local-global", "past")
-      print(paste0("Learning process set to default dynamic 2 step:", " c(\"local-global\", \"past\")"))
-    }
-    if ( dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 3) {
-      structure.learning.steps <- c("local", "global", "past")
-      print(paste0("Learning process set to default dynamic 3 step:", " c(\"local\", \"global\", \"past\")"))
-    }
-    if ( !dynamic & length(structure.learning.steps) == 1 && structure.learning.steps == 2){
-      structure.learning.steps <- c("local", "global")
-    }
-    if ( !remove.past.G && (identical(structure.learning.steps, c("local-past", "global")) |
-                            identical(structure.learning.steps, c("past-local", "global")) ||
-                            identical(structure.learning.steps, c("local", "past", "global"))
-                            )   ) {stop("Use remove.past.G = TRUE to inject past nodes before G nodes.")}
+
+    structure.learning.steps <- parseStructureLearningStepsArg(structure.learning.steps, dynamic, remove.past.G)
 
     if (grepl("past", structure.learning.steps[1])) {
       int.dynamic.args.list <- list(remove.past.G = FALSE, epochs = epochs)
@@ -271,14 +258,13 @@ build.downscalingBN <- function(data,
       print("Computing Marginal Distributions...")
       marginals_ <- marginals( list(BN = bn, BN.fit = bn.fit, NX = NX) )
       print("Done.")
-    }
-    else {marginals_ <- NULL}
+    } else {marginals_ <- NULL}
+
     if (compile.junction){
       print("Compiling junction...")
       junction <- compile( as.grain(bn.fit) )
       print("Done.")
-    }
-    else {junction <- NULL}
+    } else {junction <- NULL}
 
     if (dynamic) {dynamic.args.list <- list( epochs = epochs, remove.past.G = remove.past.G,
                                              forbid.backwards = forbid.backwards,
@@ -287,11 +273,12 @@ build.downscalingBN <- function(data,
                                              forbid.past.DD = forbid.past.DD)
       names.distribution <- data$names.distribution
     }
-    else {dynamic.args.list <- NULL
-    names.distribution <- NULL}
+    else {
+      dynamic.args.list <- NULL
+      names.distribution <- NULL
+    }
 
     if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
-
 
     return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
                  dynamic.args.list = dynamic.args.list,

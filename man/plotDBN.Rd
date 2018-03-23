@@ -6,7 +6,8 @@
 \usage{
 plotDBN(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALSE,
   vertex.label.dist = 0.05, no.colors = NULL, node.size = 3,
-  edge.width = 0.6, edge.arrow.size = 0.2, break.axis = 1,
+  edge.width = 0.6, edge.arrow.size = 0.2, color.edges = TRUE,
+  color.edges.color = c("red", "blue"), break.axis = 1,
   separation.ratio = 0.1, Nlabels = 4)
 }
 \arguments{
