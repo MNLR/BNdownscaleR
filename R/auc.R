@@ -27,7 +27,7 @@ auc <- function(probabilities, name, real, event = 1, not.event = 0,  points = 1
   YoudensIndex <- which.max((1-roc.xvalues) + roc.yvalues)
   best.threshold <- disc[YoudensIndex]
   if (return.YI){
-    return( list(auc = auc , best.threshold = best.threshold) )
+    return( list(auc = auc , YI = best.threshold) )
   }
   else{
     return( auc )

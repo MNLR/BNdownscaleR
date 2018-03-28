@@ -28,10 +28,10 @@ downscale.BN <- function(DBN, x,
   if ( parallelize == TRUE) {
 
     PSOCK.varExports.list <- list( "junction", "predictors" , "predictands", "x")
-    PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain" , "queryJunction")
+    PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain" , "queryBN")
     cl <- parallelHandler(cluster.type, n.cores, PSOCK.varExports.list, PSOCK.funcExportsNames.list, cl)
 
-    PT <- lapply(x, FUN = function (x) { parApply(cl, x, MARGIN = 1, FUN = queryJunction,
+    PT <- lapply(x, FUN = function (x) { parApply(cl, x, MARGIN = 1, FUN = queryBN,
                                                   predictors = predictors, junction = junction , predictands = predictands
                                                   )
                                         }
@@ -42,7 +42,7 @@ downscale.BN <- function(DBN, x,
     }
   }
   else { # Do not parallelize
-    PT <- lapply( x, FUN = function (x) {apply(x, MARGIN = 1, FUN =  queryJunction,
+    PT <- lapply( x, FUN = function (x) {apply(x, MARGIN = 1, FUN =  queryBN,
                                                predictors = predictors, junction = junction , predictands = predictands
                                                )
                                         }
@@ -54,23 +54,6 @@ downscale.BN <- function(DBN, x,
     return(PT)
   }
   else {
-    # Node re-ordering due to bnlearn disordering
-    return( lapply( PT, function(ELPT) { downscaled <- aperm(simplify2array( sapply(ELPT, simplify2array, simplify = FALSE),
-                                                                             higher = TRUE ) , c(3,1,2)
-                                                            )
-                                      ELPT <- downscaled[,,match(predictands, colnames(downscaled[1,,]))]
-                                      if ( prediction.type == "event" ){
-                                        if (is.character(threshold.vector) && threshold.vector == "climatologic") {
-                                          threshold.vector <- 1 - DBN$marginals[event, ]
-                                        } else { threshold.vector <- rep(0.5, DBN$NY) }
-
-                                        return( convertEvent(ELPT, event = event, threshold.vector =  threshold.vector) )
-                                      }
-                                      else {
-                                        return(ELPT)
-                                      }
-                                  }
-                  )
-          )
+    return( auxParseProbabilitiesList(PT, predictands, prediction.type, threshold.vector, marginals, event))
   }
 }
