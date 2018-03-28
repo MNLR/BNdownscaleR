@@ -6,7 +6,7 @@
 \usage{
 build.downscalingBN(data, structure.learning.algorithm = "hc",
   structure.learning.args.list = list(), param.learning.method = "bayes",
-  forbid.GG = TRUE, forbid.DD = FALSE, forbid.DtoG = TRUE,
+  forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
   dynamic = FALSE, epochs = 2, remove.past.G = TRUE,
   keep.dynamic.distance = TRUE, forbid.backwards = FALSE,
   forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE,

@@ -6,7 +6,7 @@
 \usage{
 downscale.BN(DBN, x, prediction.type = "probabilities", event = "1",
   threshold.vector = NULL, output.attr.evidence = FALSE, cl = NULL,
-  stop.cluster = FALSE, parallelize = FALSE, n.cores = NULL,
+  stop.cluster = TRUE, parallelize = FALSE, n.cores = NULL,
   cluster.type = "FORK")
 }
 \arguments{

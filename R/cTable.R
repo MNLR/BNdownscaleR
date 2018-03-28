@@ -1,9 +1,16 @@
 #' @export
 
 cTable <- function(predicted, real){
-  real <- matrix(as.numeric(real), ncol = NCOL(real) )
-  predicted <-matrix(as.numeric(predicted), ncol = NCOL(predicted) )
-  ct1 <- table( predicted - 2*real)
+
+  if (is.data.frame(real)){ real <- data.matrix(real) -1 }
+  else { real <- data.matrix(real) }
+  if (is.data.frame(predicted)){ predicted <- data.matrix(predicted) -1 }
+  else { predicted <- data.matrix(predicted) }
+
+  if (!identical(names(table(real)), names(table(predicted)))){
+    stop("Prediction and real events mismatch.")
+  }
+  ct1 <- table( predicted - 2*real )
   r1 <- as.numeric(c(ct1["0"], ct1["-2"] ))
   r2 <- as.numeric(c(ct1["1"], ct1["-1"] ))
   CT <- matrix( c(r1,r2 ), ncol = 2, byrow = TRUE)

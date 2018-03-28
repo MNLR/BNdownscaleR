@@ -7,8 +7,8 @@
 plotLatLonDAG(bn, positions, distance = NULL, nodes = -1,
   no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
   node.size = 4, edge.width = 0.5, edge.arrow.size = 0.15,
-  color.edges = TRUE, color.edges.color = c("gray", "black"), dev = FALSE,
-  axes = TRUE, xlab = "x", ylab = "y")
+  edges.color = c("gray", "black"), dev = FALSE, axes = TRUE,
+  xlab = "x", ylab = "y")
 }
 \author{
 M.N. Legasa

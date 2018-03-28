@@ -11,7 +11,7 @@ parallelHandler <- function(type, n.cores,
 
   if (is.null(cl)){   # Initiate cluster, if not already
     if ( is.null(n.cores) ){
-      n.cores <- floor(detectCores()-1)
+      n.cores <- detectCores()-1
     }
     print("Starting cluster for parallel computation...")
     cl <- makeCluster( n.cores, type = type )
@@ -29,4 +29,4 @@ parallelHandler <- function(type, n.cores,
   }
   print("Cluster good to go.")
   return(cl)
-  }
+}

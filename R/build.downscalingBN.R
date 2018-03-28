@@ -93,12 +93,11 @@
 #' @examples
 #' # Loading predictors
 
-
 build.downscalingBN <- function(data,
                                 structure.learning.algorithm = "hc",
                                 structure.learning.args.list = list(),
                                 param.learning.method = "bayes",
-                                forbid.GG = TRUE, forbid.DD = FALSE, forbid.DtoG = TRUE,
+                                forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
                                 dynamic = FALSE, epochs = 2, remove.past.G = TRUE, keep.dynamic.distance = TRUE,
                                 forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
                                 structure.learning.steps = 1,
@@ -262,7 +261,7 @@ build.downscalingBN <- function(data,
 
     if (compile.junction){
       print("Compiling junction...")
-      junction <- compile( as.grain(bn.fit) )
+      junction <- compile( as.grain(bn.fit), propagate = TRUE )
       print("Done.")
     } else {junction <- NULL}
 
