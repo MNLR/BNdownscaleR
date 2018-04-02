@@ -138,7 +138,6 @@ build.downscalingBN <- function(data,
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
 
     structure.learning.steps <- parseStructureLearningStepsArg(structure.learning.steps, dynamic, remove.past.G)
-
     if (grepl("past", structure.learning.steps[1])) {
       int.dynamic.args.list <- list(remove.past.G = FALSE, epochs = epochs)
     }
@@ -269,7 +268,8 @@ build.downscalingBN <- function(data,
                                              forbid.backwards = forbid.backwards,
                                              forbid.past.dynamic.GD = forbid.past.dynamic.GD,
                                              forbid.dynamic.GG = forbid.dynamic.GG,
-                                             forbid.past.DD = forbid.past.DD)
+                                             forbid.past.DD = forbid.past.DD
+                                           )
       names.distribution <- data$names.distribution
     }
     else {
