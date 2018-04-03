@@ -1,4 +1,4 @@
-auc <- function(probabilities, name, real, event = 1, not.event = 0,  points = 1000, plot.curve = FALSE, return.YI = FALSE ) {
+auc <- function(probabilities, name, real, event = 1, not.event = 0,  points = 100, plot.curve = FALSE, return.YI = FALSE ) {
   disc <- seq(from = 0, to = 1, length.out =  points)
 
   occurence <- lapply(disc,
