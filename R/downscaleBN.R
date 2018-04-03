@@ -60,7 +60,10 @@ downscaleBN <- function(DBN, x,
   print("Done.")
 
   if ( prediction.type == "probabilities.list" ) { return(PT) }
-  else if ( prediction.type == "simulation") { return(lapply(PT, FUN = function(PT_) {return(t(PT_))})) }
+  else if ( prediction.type == "simulation") {
+    return(lapply(PT, FUN = function(PT_) {
+                                            return(characterToOperableMatrix(t(PT_)))}))
+                                          }
   else {
     return( auxParseProbabilitiesList(PT, predictands, prediction.type, threshold.vector,
                                       marginals, event))
