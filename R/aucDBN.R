@@ -1,5 +1,6 @@
 #' @export
-aucDBN <- function(downscaled, realData, is.event = FALSE, points = 100, plot.curves = TRUE, return.YI = FALSE){
+aucDBN <- function(downscaled, realData, is.event = FALSE,
+                   plot.curves = TRUE, points = 100, return.YI = FALSE){
   # realData must be binary
   if (is.event){ station.names <- colnames(downscaled) }
   else{ station.names <- colnames(downscaled[1,,])}
@@ -9,7 +10,7 @@ aucDBN <- function(downscaled, realData, is.event = FALSE, points = 100, plot.cu
     if (!(all(is.na(realData[ , station])))){
       if (is.event){ inp <- downscaled[, station] }
       else{inp <- downscaled[, , station][ , "1"]}
-      auc_ <-auc( probabilities =   inp,
+      auc_ <- auc( probabilities =  inp,
                   name = station.names[station],
                   real = realData[, station],
                   is.event = is.event,

@@ -1,4 +1,5 @@
-auc <- function(probabilities, name, real, is.event=FALSE, event = 1, not.event = 0,  points = 100, plot.curve = FALSE, return.YI = FALSE ) {
+auc <- function(probabilities, name, real, is.event=FALSE, event = 1, not.event = 0,  points = 100,
+                plot.curve = FALSE, color = "black", points.curve = FALSE, return.YI = FALSE ) {
 
   if (is.event){
     ctR <- cTableRates(cTable(predicted = probabilities, real = real))
@@ -13,7 +14,9 @@ auc <- function(probabilities, name, real, is.event=FALSE, event = 1, not.event 
   else{
     disc <- seq(from = 0, to = 1, length.out =  points)
     occurence <- lapply(disc,
-                        FUN =  function( threshold , probabilities) return(as.numeric(probabilities >= threshold)),
+                        FUN = function( threshold , probabilities) {
+                                  return( as.numeric(probabilities >= threshold) )
+                              },
                         probabilities = probabilities )
     if (event != 1){
       real[real == event] <- 1
@@ -31,10 +34,19 @@ auc <- function(probabilities, name, real, is.event=FALSE, event = 1, not.event 
 
     auc <- integrate.xy(roc.xvalues ,  roc.yvalues, use.spline = FALSE)
     if (plot.curve){
-      plot(roc.xvalues, roc.yvalues, type = "l",  main=paste0("ROC curve for ", name ),
-           sub = paste("AUC =", as.character(auc)),
-           xlab="False Positive Rate", ylab="True Positive Rate")
-      lines(disc, disc, lty = 2)
+      if (points.curve){
+        points(roc.xvalues, roc.yvalues, type = "l",  main=paste0("ROC curve for ", name ),
+             sub = paste("AUC =", as.character(auc)), col = color,
+             xlab="False Positive Rate", ylab="True Positive Rate"
+             )
+      }
+      else{
+        plot(roc.xvalues, roc.yvalues, type = "l",  main=paste0("ROC curve for ", name ),
+             sub = paste("AUC =", as.character(auc)), col = color,
+             xlab="False Positive Rate", ylab="True Positive Rate"
+             )
+        lines(disc, disc, lty = 2)
+      }
     }
 
     YoudensIndex <- which.max((1-roc.xvalues) + roc.yvalues)
