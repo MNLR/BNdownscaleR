@@ -7,12 +7,13 @@
 build.downscalingBN(data, structure.learning.algorithm = "hc",
   structure.learning.args.list = list(), param.learning.method = "bayes",
   forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
-  dynamic = FALSE, epochs = 2, remove.past.G = TRUE,
-  keep.dynamic.distance = TRUE, forbid.backwards = FALSE,
-  forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = TRUE,
-  forbid.past.DD = TRUE, structure.learning.steps = 1,
-  fix.intermediate = TRUE, structure.learning.algorithm2 = NULL,
-  structure.learning.args.list2 = list(),
+  force.closest.GD = NULL, closest.GD.direction = NULL, forbid.GD = FALSE,
+  structure.learning.steps = 1, fix.intermediate = TRUE,
+  structure.learning.algorithm2 = NULL,
+  structure.learning.args.list2 = list(), dynamic = FALSE, epochs = 2,
+  remove.past.G = TRUE, keep.dynamic.distance = TRUE,
+  forbid.backwards = FALSE, forbid.past.dynamic.GD = TRUE,
+  forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
   structure.learning.algorithm3 = NULL,
   structure.learning.args.list3 = list(), return.intermediate = FALSE,
   output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
@@ -21,18 +22,68 @@ build.downscalingBN(data, structure.learning.algorithm = "hc",
 \arguments{
 \item{data}{Expects output from \code{\link[BNdownscaleR]{prepare_predictors.forBN}}.}
 
-\item{structure.learning.algorithm}{Algorithm used to perform structure learning, with name as text. Supports all the score-based,
-constraint-based  and hybrid bayesian network algorithms from \code{\link[bnlearn]{bnlearn}}.
+\item{structure.learning.algorithm}{Algorithm used to perform structure learning, with name
+as text. Supports all the score-based, constraint-based and hybrid bayesian network structure
+learning algorithms from \code{\link[bnlearn]{bnlearn}}.
 Refer to \code{Details} for a list of supported algorithms.}
 
-\item{structure.learning.args.list}{List of arguments passed to structure.learning.algorithm, in particular distance argument if
-local learning is used. Refer to \code{\link[bnlearn]{bnlearn}} for the specific options.}
+\item{structure.learning.args.list}{List of arguments passed to structure.learning.algorithm,
+in particular distance argument if local learning is used. Note that other arguments, e.g.
+\code{whitelist}, are an option (check the naming convention, see \code{Details}).
+Refer to \code{\link[bnlearn]{bnlearn}} for the specific options.}
 
-\item{param.learning.method}{Either "bayes" or "mle", passed to learn the parameters of the built network structure from \code{data}.}
+\item{param.learning.method}{Either "bayes" or "mle", passed to learn the parameters for the
+Conditional Probability Tables for the built DAG \code{data}.}
 
-\item{forbid.GG}{Arcs between grid or G nodes will be forbidden.}
+\item{forbid.GG}{If set to TRUE, arcs between grid or G nodes will be forbidden.}
 
-\item{forbid.DD}{Arcs between local, i.e. station or D nodes, will be forbidden.}
+\item{forbid.DD}{If set to TRUE, arcs between local, i.e. station or D nodes, will be forbidden.}
+
+\item{forbid.DtoG}{If set to TRUE, arcs from D nodes to G nodes will be forbidden.}
+
+\item{force.closest.GD}{Expects a positive integer or \code{NULL}. If not \code{NULL}, each D node will
+be linked, see \code{closest.GD.direction}, with the n closest G node(s), where n is
+\code{force.closest.GD}.}
+
+\item{closest.GD.direction}{Either \code{NULL}, which lets the structure learning algorithm
+decide the direction, "up", which will place the arc(s) in the form \code{D -> G}, or "down",
+which will place the arc(s) in the form \code{G -> D}.}
+
+\item{forbid.GD}{If set to TRUE, arcs between G and D nodes will be forbidden. See
+\code{Details}.}
+
+\item{structure.learning.steps}{It is used to perform structure learning in up to three steps.
+ Note that \code{past} refers to the past epochs when \code{dynamic = TRUE}.
+ Refer to \code{Details}.
+\itemize{
+ \item \code{1} or \code{NULL} (Default) 1 step
+ \item \code{2} or \code{c("local", "global")} If \code{dynamic = FALSE} learn first a DAG
+ for D nodes, then inject G nodes. If \code{dynamic = TRUE} it equals
+ c("local-global", "past")
+ \item \code{3} Equals c("local", "global", "past")
+ \item \code{c("local-global", "past")} or \code{c("global-local", "past")}.
+  Learn first DAG for D and G nodes, then inject past nodes.
+ \item \code{c("local", "global-past")} or \code{c("local", "past-global")}.
+ Learn first DAG for D nodes, then inject past and G nodes.
+ \item \code{c("local-past", "global")} or \code{c("past-local", "global")}.
+ Learn first DAG for D and past nodes, then inject G nodes.
+ \item \code{c("local", "global", "past")} Learn first DAG for D nodes, then inject G nodes,
+ then inject past nodes.
+ \item \code{c("local", "past", "global")} Learn first DAG for D nodes, then inject
+ past nodes, then inject G nodes.
+}
+Note that only first two options are valid when \code{dynamic = FALSE}}
+
+\item{fix.intermediate}{Set to TRUE to forbid the creation of new arcs in the next steps
+for already built DAGs. See \code{Details}.
+\code{structure.learning.algorithm2} and \code{structure.learning.args.list2}. See
+ \code{Details}.}
+
+\item{structure.learning.algorithm2}{Same as structure.learning.algorithm for the second
+step if \code{structure.learning.steps} is employed. Ignored otherwise.}
+
+\item{structure.learning.args.list2}{Same as structure.learning.args.list for the second
+step if \code{structure.learning.steps} is employed. Ignored otherwise.}
 
 \item{dynamic}{Set to TRUE to use Dynamic Bayesian Networks. See \code{Details}.}
 
@@ -40,66 +91,51 @@ local learning is used. Refer to \code{\link[bnlearn]{bnlearn}} for the specific
 
 \item{remove.past.G}{When \code{dynamic = TRUE} Set to TRUE to remove the past G nodes.}
 
-\item{keep.dynamic.distance}{When \code{dynamic = TRUE} and local learning is employed, if set to TRUE it will use its corresponding
-distance (See \code{Details}) between nodes from diferent epochs.}
+\item{keep.dynamic.distance}{When \code{dynamic = TRUE} and local learning is employed,
+if set to TRUE it will use its corresponding distance (See \code{Details}) between nodes
+from diferent epochs.}
 
-\item{forbid.backwards}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs going back in time.}
+\item{forbid.backwards}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs going
+back in time.}
 
-\item{forbid.past.dynamic.GD}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs in the form G->D or D->G between different epochs.}
+\item{forbid.past.dynamic.GD}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs in the
+form G->D or D->G between different epochs.}
 
-\item{forbid.dynamic.GG}{When \code{dynamic = TRUE} and \code{remove.past.G = FALSE}, set to TRUE to forbid arcs in the form G-G in the
-past epochs.}
+\item{forbid.dynamic.GG}{When \code{dynamic = TRUE} and \code{remove.past.G = FALSE}, set to
+TRUE to forbid arcs in the form G-G in the past epochs.}
 
-\item{forbid.past.DD}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs in the form D-D in the past epochs.}
+\item{forbid.past.DD}{When \code{dynamic = TRUE}, set to TRUE to forbid arcs in the form D-D
+in the past epochs.}
 
-\item{structure.learning.steps}{It is used to perform structure learning in up to three steps. Refer to \code{Details}.
-\itemize{
- \item \code{1} or \code{NULL} (Default) 1 step
- \item \code{2} or \code{c("local", "global")} If \code{dynamic = FALSE} learn first a DAG for D nodes, then inject G nodes. If \code{dynamic = TRUE} it
- equals c("local-global", "past")
- \item \code{3} Equals c("local", "global", "past")
- \item \code{c("local-global", "past")} or \code{c("global-local", "past")} Learn first DAG for D and G nodes, then inject past nodes.
- \item \code{c("local", "global-past")} or \code{c("local", "past-global")} Learn first DAG for D nodes, then inject past and G nodes.
- \item \code{c("local-past", "global")} or \code{c("past-local", "global")} Learn first DAG for D and past nodes, then inject G nodes.
- \item \code{c("local", "global", "past")} Learn first DAG for D nodes, then inject G nodes, then inject past nodes.
- \item \code{c("local", "past", "global")} Learn first DAG for D nodes, then inject past nodes, then inject G nodes.
-}
-Note that only first two options are valid when \code{dynamic = FALSE}}
+\item{structure.learning.algorithm3}{Same as structure.learning.algorithm for the third
+step if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.}
 
-\item{fix.intermediate}{Set to TRUE to forbid the creation of new arcs in the next steps for already built DAGs. See \code{Details}.
-\code{structure.learning.algorithm2} and \code{structure.learning.args.list2}. See \code{Details}.}
-
-\item{structure.learning.algorithm2}{Same as structure.learning.algorithm for the second step if \code{structure.learning.steps} is
-employed. Ignored otherwise.}
-
-\item{structure.learning.args.list2}{Same as structure.learning.args.list for the second step if \code{structure.learning.steps} is
-employed. Ignored otherwise.}
-
-\item{structure.learning.algorithm3}{Same as structure.learning.algorithm for the third step if \code{structure.learning.steps} with
-3 steps is employed. Ignored otherwise.}
-
-\item{structure.learning.args.list3}{Same as structure.learning.args.list for the third step if \code{structure.learning.steps} with
-3 steps is employed. Ignored otherwise.
+\item{structure.learning.args.list3}{Same as structure.learning.args.list for the third step
+if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.
 See \code{Details}.}
 
-\item{return.intermediate}{Add the intermediate DAGs to the output, as $intermediateDBN1 and $intermediateDBN2 (if any) if
-\code{structure.learning.steps} is employed.}
+\item{return.intermediate}{Add the intermediate DAGs to the output, as $intermediateDBN1 and
+$intermediateDBN2 (if any) if \code{structure.learning.steps} is employed.}
 
-\item{output.marginals}{Compute and output Marginal Probability distribution Tables. Setting this to \code{FALSE} will force
-\code{prediction.type = "probabilities"} in  \code{downscale.BN()}.}
+\item{output.marginals}{Compute and output Marginal Probability distribution Tables. Setting
+this to \code{FALSE} will force \code{prediction.type = "probabilities"} in
+\code{downscale.BN()}.}
 
-\item{compile.junction}{Compile the junction from BN.fit to compute probabilities. Can be set to FALSE,
-in which case it will be computed at the training stage in \code{downscale.BN()}.}
+\item{compile.junction}{Compile the junction from BN.fit to compute probabilities. Can be set
+to FALSE, in which case it can still be computed if needed at the training stage, i.e. through
+\code{downscale.BN()}.}
 
-\item{parallelize}{Set to \code{TRUE} for parallelization. Refer to the \code{\link[parallel]{parallel}} and see \code{Details}.}
+\item{parallelize}{Set to \code{TRUE} for parallelization. Refer to the
+\code{\link[parallel]{parallel}} and see \code{Details}.}
 
-\item{n.cores}{When \code{parallelize = TRUE}, number of threads to be used, will use detectCores()-1 if not set.}
+\item{n.cores}{When \code{parallelize = TRUE}, number of threads to be used, will use
+detectCores()-1 if not set.}
 
-\item{cluster.type}{Either "PSOCK" or "FORK". Use the former under Windows systems, refer to \code{\link[parallel]{parallel}}
-package.}
+\item{cluster.type}{Either "PSOCK" or "FORK". Use the former under Windows systems,
+refer to \code{\link[parallel]{parallel}} package.}
 }
 \value{
-An object of type DBN, which contains, in particular, the Bayesian Network.
+An object of type DBN which contains the learnt Bayesian Network.
 }
 \description{
 Downscale discrete data to local scales by means of Bayesian Networks.
@@ -127,10 +163,29 @@ learning step. E.g. if \code{structure.learning.steps = c("local", "global\-past
 second step, as the first DAG will be considered finished. If set to \code{FALSE}, the previous step DAG will be kept, but the next
 learning algorithm could create new arcs between D nodes over the first one.
 }
+
+\strong{Forbidding or Forcing Arcs}
+For non dynamic Bayesian Networks, i.e. when \code{dynamic = FALSE} (default),
+\code{forbid.GG}, \code{forbid.DD}, \code{forbid.DtoG}, \code{force.closest.GD},
+\code{forbid.GD}, \code{fix.intermediate}, \code{structure.learning.steps} allow
+introducing constraints to the structure learning algorithm. The user might also combine them
+with \code{structure.learning.args.list$whitelist} and
+\code{structure.learning.args.list$blacklist}. As \code{whitelist} has priority over
+ \code{blacklist}, i.e. an arc placed in both will always be present in the DAG, they provide
+ maximum flexibility. Bearing the priority of the \code{whitelist}, \code{force.closest.GD = TRUE}
+ and \code{forbid.GD = TRUE} will, for example, forbid the placement of \emph{aditional}
+ arcs beyond those specified as the closest G-D.
+
+ When manually specifying a whitelist or blacklist through \code{structure.learning.args.list},
+ beware of the naming convention. It overrides the names and marks them as either "D.X" or "G.X",
+ preditand and predictor nodes, respectivelly. It is best to plot a dummy network using plotDBN()
+ first.
+
+
+
 \strong{Aditional details}
-\code{output.marginals} and \code{compile.junction} are useful to save time if the user only intends to visualize the DAG.
-\code{whitelist} and \code{blacklist} arguments can be passed to structure.learning.args.list, but beware of the naming convention,
-it is best to use \code{plotDBN()} first with a dummy network.
+Parameters \code{output.marginals} and \code{compile.junction} are useful to save time if the
+ user only intends to visualize the DAG.
 }
 \examples{
 # Loading predictors

@@ -17,7 +17,8 @@ auc <- function(probabilities, name, real, is.event=FALSE, event = 1, not.event 
                         FUN = function( threshold , probabilities) {
                                   return( as.numeric(probabilities >= threshold) )
                               },
-                        probabilities = probabilities )
+                        probabilities = probabilities
+                        )
     if (event != 1){
       real[real == event] <- 1
       occurence[occurence == event ] <- 1
