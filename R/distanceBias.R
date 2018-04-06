@@ -3,11 +3,10 @@
 distanceBias <- function(real, prediction, mdist = NULL, third = NULL, measure = "phiCoef",
                          only.loes.third = FALSE,
                          title = NULL, ylab = NULL,
-                         threshold = 0.35,
-                         only.bias = TRUE, plot_ = TRUE, plot.only.loes = FALSE,
+                         plot_ = TRUE,
                          colpred = "red", colreal = "black", colthird="blue", alpha_ = 0.25, lwd=5, cex =1.5,
                          show.legend = TRUE, legend_ = NULL,
-                         show.bias = FALSE, ...) {
+                         ...) {
 
   if ( is.null(mdist) && is.list(real) && !is.null(real$xyCoords) ){
     mdist <- measureMatrix(real, measure = "distance")

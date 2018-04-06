@@ -339,10 +339,10 @@ build.downscalingBN <- function(data,
     } else {marginals_ <- NULL}
 
     if (compile.junction){
-      print("Compiling junction...")
-      junction <- compile( as.grain(bn.fit), propagate = TRUE )
-      print("Done.")
-    } else {junction <- NULL}
+      junction <- compileJunction(bn.fit)
+    } else {
+      junction <- NULL
+    }
 
     if (dynamic) {dynamic.args.list <- list( epochs = epochs, remove.past.G = remove.past.G,
                                              forbid.backwards = forbid.backwards,

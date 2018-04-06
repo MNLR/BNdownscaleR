@@ -4,16 +4,20 @@
 \alias{downscaleBN}
 \title{Downscale with Bayesian Networks}
 \usage{
-downscaleBN(DBN, x, prediction.type = "probabilities", event = "1",
-  threshold.vector = NULL, output.attr.evidence = FALSE, cl = NULL,
-  stop.cluster = TRUE, parallelize = FALSE, n.cores = NULL,
+downscaleBN(DBN, x, output = "probabilities", prediction.type = "exact",
+  event = "1", threshold.vector = NULL, output.attr.evidence = FALSE,
+  cl = NULL, stop.cluster = TRUE, parallelize = FALSE, n.cores = NULL,
   cluster.type = "FORK")
 }
 \arguments{
 \item{DBN}{Downscaling Bayesian Network, as returned by \code{build.downscalingBN()}.}
 
-\item{prediction.type}{Options are: \code{"probabilities"}, \code{"event"}, \code{"simulation"} or
-\code{"probabilities.list"}}
+\item{output}{Options are: \code{"probabilities"}, \code{"event"} and
+\code{"probabilities.list"}. You should probably not use the last one. Note that if
+\code{prediction.type = "simulation"}, output is forced to \code{"event"}.}
+
+\item{prediction.type}{Options are \code{"exact"}, \code{"approximate"} and \code{"simulation"}.
+Exact inference requires a compilable junction.}
 }
 \author{
 M.N. Legasa

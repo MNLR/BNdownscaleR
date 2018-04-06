@@ -1,7 +1,8 @@
 #' @export
 
-queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact", which_ = "marginal") {
-
+queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact",
+                     which_ = "marginal", resample.size = 10000,  cl = NULL
+                     )  {
   junction <- dbn$junction
   BN.fit <- dbn$BN.fit
 
@@ -13,11 +14,12 @@ queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact",
     return( as.factor(simulateBN(BN.fit = BN.fit, evidence.nodes = evidence.nodes, evidence = evidence,
                                 junction = junction, n = 1)) )
   }
-  else if (type == "hybrid"){
-    stop("Not yet.")
+  else if (type == "approximate"){
+    lwsample <- cpdist( fitted = BN.fit, nodes = predictands,
+             evidence = auxEvidenceTocpdistImput(evidence.nodes, evidence),
+             method = 'lw', cluster = cl)
+    simsample <- lwsample[sample(1:nrow(lwsample), prob = attributes(lwsample)$weights, size = resample.size , replace = TRUE), ]
+    return( lapply(simsample, FUN = function(x) { return( table(x)/sum(table(x)) ) } ) )
   }
-  else if (type == "inexact"){
-    stop("Not yet.")
-  }
-  else { stop("Please use a valid inference type: exact, simulation, hybrid, inexact.") }
+  else { stop("Please use a valid inference type: exact, approximate, simulation.") }
 }

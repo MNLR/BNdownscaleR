@@ -117,9 +117,7 @@ See \code{Details}.}
 \item{return.intermediate}{Add the intermediate DAGs to the output, as $intermediateDBN1 and
 $intermediateDBN2 (if any) if \code{structure.learning.steps} is employed.}
 
-\item{output.marginals}{Compute and output Marginal Probability distribution Tables. Setting
-this to \code{FALSE} will force \code{prediction.type = "probabilities"} in
-\code{downscale.BN()}.}
+\item{output.marginals}{Compute and output Marginal Probability distribution Tables.}
 
 \item{compile.junction}{Compile the junction from BN.fit to compute probabilities. Can be set
 to FALSE, in which case it can still be computed if needed at the training stage, i.e. through
@@ -142,7 +140,7 @@ Downscale discrete data to local scales by means of Bayesian Networks.
 }
 \details{
 \strong{Structure Learning Algorithms}
-Use \code{structure.learning.algorithm}
+Use \code{structure.learning.algorithm} to specify the algorithm for the structure (DAG) learning process.
 Currently it DOES NOT support local discovery algorithms, expect malfuncion if used.
 List of supported algorithms:
 \code{"hc"}, \code{"tabu"} (score-based), \code{"gs"}, \code{"iamb"}, \code{"fast.iamb"}, \code{"inter.iamb"} (constraint-based),
