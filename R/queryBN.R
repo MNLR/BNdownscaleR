@@ -18,7 +18,8 @@ queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact",
     lwsample <- cpdist( fitted = BN.fit, nodes = predictands,
              evidence = auxEvidenceTocpdistImput(evidence.nodes, evidence),
              method = 'lw', cluster = cl)
-    simsample <- lwsample[sample(1:nrow(lwsample), prob = attributes(lwsample)$weights, size = resample.size , replace = TRUE), ]
+    simsample <- lwsample[sample(1:nrow(lwsample), prob = attributes(lwsample)$weights,
+                                 size = resample.size , replace = TRUE), ]
     return( lapply(simsample, FUN = function(x) { return( table(x)/sum(table(x)) ) } ) )
   }
   else { stop("Please use a valid inference type: exact, approximate, simulation.") }

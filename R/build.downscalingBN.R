@@ -310,7 +310,6 @@ build.downscalingBN <- function(data,
                                 structure.learning.steps = structure.learning.steps,
                                 parallelize = parallelize, n.cores= n.cores,
                                 cluster.type = cluster.type,
-                                output.marginals = output.marginals,
                                 compile.junction = compile.junction,
                                 param.learning.method = param.learning.method
                                 )
@@ -323,8 +322,10 @@ build.downscalingBN <- function(data,
                                           structure.learning.args.list = structure.learning.args.list)
       }
       if (steps.left == 1){
-        DBN[["intermediateDBN1"]] <- list(BN = bn, training.data = DATA, positions = POS, dynamic.args.list = int.dynamic.args.list,
-                                          names.distribution = step.data$names.distribution, NX=NX, NY=NY,
+        DBN[["intermediateDBN1"]] <- list(BN = bn, training.data = DATA, positions = POS,
+                                          dynamic.args.list = int.dynamic.args.list,
+                                          names.distribution = step.data$names.distribution,
+                                          NX=NX, NY=NY,
                                           structure.learning.args.list = structure.learning.args.list)
       }
       return(DBN)
@@ -332,17 +333,12 @@ build.downscalingBN <- function(data,
     else { return(DBN) }
   }
   else {
-    if (output.marginals){
-      print("Computing Marginal Distributions...")
-      marginals_ <- marginals( list(BN = bn, BN.fit = bn.fit, NX = NX) )
-      print("Done.")
-    } else {marginals_ <- NULL}
-
     if (compile.junction){
       junction <- compileJunction(bn.fit)
-    } else {
-      junction <- NULL
-    }
+    } else { junction <- NULL }
+
+    marginals_ <- marginals( list(BN = bn, NX = NX, junction = junction,
+                                    training.data = DATA) )
 
     if (dynamic) {dynamic.args.list <- list( epochs = epochs, remove.past.G = remove.past.G,
                                              forbid.backwards = forbid.backwards,

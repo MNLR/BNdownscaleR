@@ -1,18 +1,29 @@
 #' @export
 
-marginals <- function(dbn, junction = NULL){
+marginals <- function(dbn, use.junction = FALSE){
   BN <- dbn$BN
-  BN.fit <- dbn$BN.fit
   Nglobal <- dbn$NX
+  junction <- dbn$junction
+  td <- dbn$training.data
 
   if (Nglobal > 0){
     predictands <- names(BN$nodes)[- (1:Nglobal) ]
   } else {predictands <- names(BN$nodes)}
-  if (is.null(junction)){
-    junction <- compile( as.grain(BN.fit) )
-  }
 
-  MPT <-sapply(predictands, function(pred, junction) {querygrain(junction, nodes = pred)[[1]]}, junction = junction)
+  if (use.junction && !is.null(junction)){
+    MPT <-sapply(predictands,
+                 function(pred, junction) {
+                    querygrain(junction, nodes = pred)[[1]]
+                 },
+                 junction = junction)
+  }
+  else{
+    MPT <- apply( td[ , (Nglobal+1):ncol(td)], MARGIN = 2, FUN = function(x) {
+                                                              tx <- table(x)
+                                                              return(t(tx/sum(tx)))
+                                                            }
+           )
+  }
 
   return( MPT )
 }
