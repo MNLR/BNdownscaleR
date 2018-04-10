@@ -5,3 +5,5 @@ things.R
 man/hello.Rd
 exampleplots/*
 test*
+GER.R
+IBN.R

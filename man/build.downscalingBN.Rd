@@ -16,8 +16,8 @@ build.downscalingBN(data, structure.learning.algorithm = "hc",
   forbid.dynamic.GG = TRUE, forbid.past.DD = TRUE,
   structure.learning.algorithm3 = NULL,
   structure.learning.args.list3 = list(), return.intermediate = FALSE,
-  output.marginals = TRUE, compile.junction = TRUE, parallelize = FALSE,
-  n.cores = NULL, cluster.type = "FORK")
+  compile.junction = TRUE, parallelize = FALSE, n.cores = NULL,
+  cluster.type = "FORK")
 }
 \arguments{
 \item{data}{Expects output from \code{\link[BNdownscaleR]{prepare_predictors.forBN}}.}
@@ -117,8 +117,6 @@ See \code{Details}.}
 \item{return.intermediate}{Add the intermediate DAGs to the output, as $intermediateDBN1 and
 $intermediateDBN2 (if any) if \code{structure.learning.steps} is employed.}
 
-\item{output.marginals}{Compute and output Marginal Probability distribution Tables.}
-
 \item{compile.junction}{Compile the junction from BN.fit to compute probabilities. Can be set
 to FALSE, in which case it can still be computed if needed at the training stage, i.e. through
 \code{downscale.BN()}.}
@@ -131,6 +129,8 @@ detectCores()-1 if not set.}
 
 \item{cluster.type}{Either "PSOCK" or "FORK". Use the former under Windows systems,
 refer to \code{\link[parallel]{parallel}} package.}
+
+\item{output.marginals}{Compute and output Marginal Probability distribution Tables.}
 }
 \value{
 An object of type DBN which contains the learnt Bayesian Network.
