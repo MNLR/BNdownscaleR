@@ -159,7 +159,6 @@ build.downscalingBN <- function(data,
                                 structure.learning.algorithm3 = NULL,
                                 structure.learning.args.list3 = list(),
                                 return.intermediate = FALSE,
-                                output.marginals = TRUE,
                                 compile.junction = TRUE,
                                 parallelize = FALSE, n.cores= NULL, cluster.type = "FORK"
                                 ) {
@@ -288,31 +287,37 @@ build.downscalingBN <- function(data,
 
     structure.learning.args.list2 <- initializeDummyGreylist(structure.learning.args.list2,
                                                              "whitelist")
-    rbind(structure.learning.args.list2$whitelist, whitelist)
+    structure.learning.args.list2$whitelist <- rbind(structure.learning.args.list2$whitelist, whitelist)
 
     DBN <-  build.downscalingBN(data,
+                                structure.learning.algorithm = structure.learning.algorithm2,
+                                structure.learning.args.list = structure.learning.args.list2,
+                                param.learning.method = param.learning.method,
                                 forbid.GG = forbid.GG,
                                 forbid.DD = forbid.DD,
                                 forbid.DtoG = forbid.DtoG,
                                 force.closest.GD = force.closest.GD,
                                 closest.GD.direction = closest.GD.direction,
                                 forbid.GD = forbid.GD,
-                                structure.learning.algorithm = structure.learning.algorithm2,
-                                structure.learning.args.list = structure.learning.args.list2,
+                                structure.learning.steps = structure.learning.steps,
+                                fix.intermediate = fix.intermediate,
                                 structure.learning.algorithm2 = structure.learning.algorithm3,
                                 structure.learning.args.list2 = structure.learning.args.list3,
-                                return.intermediate = return.intermediate,
-                                dynamic = dynamic, keep.dynamic.distance, epochs = epochs,
-                                remove.past.G = remove.past.G,forbid.backwards = forbid.backwards,
+                                dynamic = dynamic,
+                                epochs = epochs,
+                                remove.past.G = remove.past.G,
+                                keep.dynamic.distance = keep.dynamic.distance,
+                                forbid.backwards = forbid.backwards,
                                 forbid.past.dynamic.GD = forbid.past.dynamic.GD,
                                 forbid.dynamic.GG = forbid.dynamic.GG,
                                 forbid.past.DD = forbid.past.DD,
-                                structure.learning.steps = structure.learning.steps,
-                                parallelize = parallelize, n.cores= n.cores,
-                                cluster.type = cluster.type,
+                                return.intermediate = return.intermediate,
                                 compile.junction = compile.junction,
-                                param.learning.method = param.learning.method
+                                parallelize = parallelize,
+                                n.cores= n.cores,
+                                cluster.type = cluster.type
                                 )
+
     if (return.intermediate){
       if (steps.left == 2){
         DBN[["intermediateDBN2"]] <- list(BN = bn, training.data = DATA, positions = POS,

@@ -3,7 +3,6 @@ compileJunction <- function( bn.fit ){
   junction <- tryCatch(
     {
       compile(as.grain(bn.fit), propagate = TRUE)
-      print("Done.")
     },
     error=function(cond) {
     message("Warning: junction could not be compiled. Cause: ")
@@ -11,4 +10,6 @@ compileJunction <- function( bn.fit ){
     return(NA)
     }
   )
+  print("Done.")
+  return(junction)
 }
