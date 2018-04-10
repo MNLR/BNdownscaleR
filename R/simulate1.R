@@ -1,10 +1,31 @@
-simulate1 <- function(mbn, evidence.nodes, evidence, junction, evidence0, predictandS ) {
+simulate1 <- function(BN.fit, junction, evidence.nodes, evidence) {
 
-  dummydbn <- list(junction = junction)
+  if (length(evidence.nodes) != length(evidence)) {stop("Provide a single evidence for every evidence node.")}
+  if (!identical(intersect(names(BN.fit), evidence.nodes), evidence.nodes)){
+    stop("Some of the evidence.nodes are not present in the DAG.")
+  }
+  predictandS <- setdiff(names(BN.fit), evidence.nodes)
+
+  mbn <- mutilated(BN.fit, evidence = auxEvidenceTocpdistImput(evidence.nodes, evidence))
+  mbn <- mbn[predictandS]
+  nodes.parents <- sapply(mbn, FUN = function(x) {return(length(x$parents))})
+  mbn <- mbn[names(nodes.parents)[order(nodes.parents)]]
+  evidence0 <- length(evidence.nodes)
+
+  if (is.null(junction) || is.na(junction)){
+    type <- "approximate"
+  } else{
+    type <- "exact"
+  }
+
+  dummydbn <- list(junction = junction, BN.fit = BN.fit)
   for (i in 1:length(mbn)){
     predictand <- mbn[[i]]$node
     PT <- queryBN(evidence = evidence, dbn = dummydbn, evidence.nodes = evidence.nodes,
-                  predictands = predictand, type = "exact", which_ = "marginal")[[predictand]]
+                  predictands = predictand, type = type, which_ = "marginal")
+    if (type == "exact"){
+      PT <- PT[[predictand]]
+    }
 
     simulated <- sample(x = names(PT), size = 1, prob = PT)
     evidence.nodes <- c(evidence.nodes, predictand)

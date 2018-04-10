@@ -19,10 +19,16 @@ marginals <- function(dbn, use.junction = FALSE){
   }
   else{
     MPT <- apply( td[ , (Nglobal+1):ncol(td)], MARGIN = 2, FUN = function(x) {
-                                                              tx <- table(x)
-                                                              return(t(tx/sum(tx)))
-                                                            }
+                                                                  tx <- table(x)
+                                                                  return(t(tx/sum(tx)))
+                                                                }
            )
+    MPTnames <- apply( td[ , (Nglobal+1):ncol(td)], MARGIN = 2, FUN = function(x) {
+                                                                        return(names(table(x)))
+                                                                      }
+                      )
+
+    attr(MPT, "names") <- MPTnames
   }
 
   return( MPT )

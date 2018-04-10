@@ -42,8 +42,9 @@ downscaleBN <- function(DBN, x, output = "probabilities",
     PSOCK.funcExportsNames.list <- list("setEvidence", "querygrain", "queryBN")
     cl <- parallelHandler(cluster.type, n.cores, PSOCK.varExports.list, PSOCK.funcExportsNames.list, cl)
     PT <- lapply(x, FUN = function (x) { pbapply(cl = cl, X = x, MARGIN = 1, FUN = queryBN,
-                                                  dbn = DBN, evidence.nodes = predictors,
-                                                  predictands = predictands, type = prediction.type
+                                                 dbn = DBN, evidence.nodes = predictors,
+                                                 predictands = predictands,
+                                                 type = prediction.type
                                                   )
                                         }
                 )
@@ -54,19 +55,26 @@ downscaleBN <- function(DBN, x, output = "probabilities",
   }
   else { # Do not parallelize
     PT <- lapply( x, FUN = function (x) {pbapply(X = x, MARGIN = 1, FUN =  queryBN,
-                                               dbn = DBN, evidence.nodes = predictors,
-                                               predictands = predictands, type = prediction.type
-                                               )
+                                                 dbn = DBN, evidence.nodes = predictors,
+                                                 predictands = predictands,
+                                                 type = prediction.type
+                                                )
                                         }
                 )
   }
   print("Done.")
 
   if (prediction.type == "simulation"){
-      return(lapply(PT,
-                    FUN = function(PT_) { return(characterToOperableMatrix(t(PT_)))}
-      )
-      )
+    PT <- lapply(PT,
+                 FUN = function(PT_) { return(characterToOperableMatrix(t(PT_)))}
+                )
+
+    return(lapply(PT, FUN = function(PTel, predictands) {
+                    order.index <- match(predictands, colnames(PTel))
+                    return( PTel[ , order.index] )
+                  }, predictands = predictands
+           )
+    )
   }
   else {
     if ( output == "probabilities.list" ) { return(PT) }
