@@ -11,7 +11,8 @@ Imports:
     shape,
     parallel,
     pbapply,
-    infotheo
+    infotheo,
+    verification
 Suggests:
     loadeR
 Type: Package

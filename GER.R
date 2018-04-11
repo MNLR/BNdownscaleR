@@ -39,7 +39,7 @@ dbnGER <- build.downscalingBN(dataGER,
                              )
 
 plotDBN(dbnGER, dev = TRUE)
-# exp.name <- "dbnGER.pdf"
+# exp.name <- "phiGER_sim.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
 txx <- getTemporalIntersection(obs = filterNA(yy), prd = filterNA(xx), which.return = "prd")
@@ -61,7 +61,7 @@ syy <- downscaleBN(dbnGER, x = testGER,
                    parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
 
 
-aucGER <- aucDBN(downscaled = pyy$member_1, realData = tyy$Data)
+aucGER <- aucStation(prediction = pyy$member_1, realData = tyy$Data)
 c(max(aucGER), min(aucGER), mean(aucGER))
 
 cthreshold <- findClimatologyThreshold(pyy$member_1, dbnGER$marginals[2 , ])
@@ -85,3 +85,15 @@ distanceBias(real = tyy,
                                         threshold.vector = rep(0.5, length(dataGER$y.names)))
              )
 points(dGGER, phiGGER, col = "green")
+
+#aucvs(realData = tyy$Data, downscaled = pyy$member_1, downscaled2 = syy$member_1,
+#         is.event2 = TRUE)
+
+distanceBias(real = tyy,
+             prediction = syy$member_1
+             )
+downscaleR.BN:::cTableRates(cTable(predicted = syy, real = tyy$Data ))
+
+
+
+

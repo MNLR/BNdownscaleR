@@ -87,14 +87,13 @@ sy <- downscaleBN(dbn, x = test,
                         parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
 
 
-dbnaucS <- aucDBN(downscaled = py$member_1, realData = ty$Data, plot.curves = TRUE,
-                  return.YI = TRUE)
+dbnaucS <- aucStation(prediction = py$member_1, realData = ty$Data, plot.curves = TRUE)
 pye <- convertEvent( py$member_1, threshold.vector = 0.5)
 
 cTableRates(cTable(predicted = pye, real = ty$Data))
 cTable(predicted = pye, real = ty$Data)
 distanceBias(real = ty, prediction = pye )
 
-aucDBNvs(realData = ty$Data, downscaled = py$member_1, downscaled2 = sy$member_1,
-         is.event2 = TRUE)
+#aucvs(realData = ty$Data, downscaled = py$member_1, downscaled2 = sy$member_1,
+#         is.event2 = TRUE)
 
