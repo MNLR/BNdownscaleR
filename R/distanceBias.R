@@ -1,10 +1,12 @@
 #' @export
 
-distanceBias <- function(real, prediction, mdist = NULL, third = NULL, measure = "phiCoef",
-                         only.loes.third = FALSE,
+distanceBias <- function(real, prediction, mdist = NULL, third = NULL, fourth = NULL,
+                         measure = "phiCoef",
+                         val.r = NULL, val.p = NULL, val.t = NULL, val.f = NULL,
                          title = NULL, ylab = NULL,
                          plot_ = TRUE,
-                         colpred = "red", colreal = "black", colthird="blue", alpha_ = 0.25, lwd=5, cex =1.5,
+                         colpred = "red", colreal = "black", colthird="blue", colfourth="green",
+                         alpha_ = 0.25, lwd=5, cex =1.5,
                          show.legend = TRUE, legend_ = NULL,
                          ...) {
 
@@ -13,9 +15,12 @@ distanceBias <- function(real, prediction, mdist = NULL, third = NULL, measure =
   } else {
     if (is.null(mdist)){ stop("real$xyCoords is not present and no mdist was provided.") }
   }
-
-  val.r <- measureMatrix(real, measure = measure, ... = ...)
-  val.p <- measureMatrix(prediction, measure = measure, ... = ...)
+  if ( is.null(val.r) ){
+    val.r <- measureMatrix(real, measure = measure, ... = ...)
+  }
+  if ( is.null(val.p) ){
+    val.p <- measureMatrix(prediction, measure = measure, ... = ...)
+  }
 
   ylim <- c(min(c(as.vector(val.r), as.vector(val.p)), na.rm = TRUE), max(c(as.vector(val.r), as.vector(val.p)), na.rm = TRUE))
 
@@ -38,13 +43,17 @@ distanceBias <- function(real, prediction, mdist = NULL, third = NULL, measure =
     smf <- loess(mm~ dist, D)
     tx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out=10000)
     ty <- predict(smf, tx)
-
-    # For the plots
-    colS <- c(colreal, colpred, colthird)
-    if (is.null(legend_)){
-      legend_ <- c("Real", "Prediction", "Third")
-    }
   }
+  # FOURTH
+  if (!is.null(fourth)){
+    val.f <- measureMatrix(fourth, measure = measure, ... = ...)
+    D <- data.frame(mm=as.vector(val.f), dist=as.vector(mdist))
+    smf <- loess(mm~ dist, D)
+    fx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out=10000)
+    fy <- predict(smf, fx)
+  }
+
+
 
   if (plot_) {
     if (is.null(ylab)){ ylab <- measure }
@@ -53,14 +62,19 @@ distanceBias <- function(real, prediction, mdist = NULL, third = NULL, measure =
     points(rx, ry, type = 'l', lwd=lwd, col = colreal)
     points(px, py, type = 'l', lwd=lwd, col = colpred)
 
+    colS <- c(colreal, colpred)
     if (!is.null(third)) {
       points(mdist, val.t, cex=cex, pch = 16, col = adjustcolor(colthird, alpha.f = alpha_))
       points(tx, ty, type = 'l', lwd=lwd, col = colthird)
-    } else { colS <- c(colreal, colpred) }
+      colS <- c(colS, colthird)
+    }
+    if (!is.null(fourth)) {
+      points(mdist, val.f, cex=cex, pch = 16, col = adjustcolor(colfourth, alpha.f = alpha_))
+      points(fx, fy, type = 'l', lwd=lwd, col = colfourth)
+      colS <- c(colS, colfourth)
+    }
+
     if (show.legend){
-      if (is.null(legend_)){
-        legend_ <- c("Real", "Prediction")
-      }
       legend("topright", legend = legend_, col = colS, pch = 16)
     }
 
