@@ -13,7 +13,8 @@ plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
                                             separation.ratio = separation.ratio)
 
     sep <- attributes(DBN$positions)$separation
-    if (DBN$dynamic.args.list$remove.past.G){ # purged past G nodes
+    if (!is.null(DBN$dynamic.args.list$remove.past.G) &&
+        DBN$dynamic.args.list$remove.past.G){ # purged past G nodes
       nx <- DBN$NX
       ny <- DBN$NY
       epS <- DBN$dynamic.args.list$epochs
@@ -27,16 +28,21 @@ plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
       #}
       #DBN$positions <-DBN$positions[ , -purge.index]
     }
-
     axes <- FALSE
   } else { axes <- TRUE }
 
   if (is.null(no.colors)) { if (length(nodes) == 1 && nodes == -1) {no.colors <- TRUE} else {no.colors <- FALSE} }
 
-  plotLatLonDAG( bn = DBN$BN, positions = DBN$positions, distance = DBN$structure.learning.args.list$distance, vertex.label.dist = vertex.label.dist,
-                 nodes = nodes, node.size = node.size, no.colors = no.colors, no.labels = no.labels, edge.width = edge.width, edge.arrow.size = edge.arrow.size,
+  plotLatLonDAG( bn = DBN$BN, positions = DBN$positions,
+                 distance = DBN$structure.learning.args.list$distance,
+                 vertex.label.dist = vertex.label.dist,
+                 nodes = nodes, node.size = node.size, no.colors = no.colors,
+                 no.labels = no.labels, edge.width = edge.width,
+                 edge.arrow.size = edge.arrow.size,
                  edges.color = edges.color,
-                 dev = dev, xlab = "Longitude", ylab = "Latitude", axes)
+                 dev = dev, xlab = "Longitude", ylab = "Latitude", axes
+                 )
+
   if (!is.null(title)) {title(title)} else {
     if (is.null(DBN$structure.learning.args.list$distance)) { ds <- ""} else {
       ds <- paste0("d=",as.character(DBN$structure.learning.args.list$distance))}
@@ -47,16 +53,20 @@ plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
     mn <- min(DBN$positions[break.axis, ])
     mx <- max(DBN$positions[break.axis, ])
     range <- abs( mx - mn )
+    par(xpd=FALSE)
     for (i in 1:(DBN$dynamic.args.list$epochs - 1)){
-      abline(v = c(mn + i*range/DBN$dynamic.args.list$epochs))
+      abline(v = c(mn + i*range/DBN$dynamic.args.list$epochs) )
     }
+    par(xpd=TRUE)
 
     # Fix broken axis:
     N.atempnodes <- DBN$NX + DBN$NY
     eps <- DBN$dynamic.args.list$epochs
 
-    min.axis <- min(DBN$positions[ break.axis , (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
-    max.axis <- max(DBN$positions[ break.axis , (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
+    min.axis <- min(DBN$positions[ break.axis ,
+                                   (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
+    max.axis <- max(DBN$positions[ break.axis ,
+                                   (ncol(DBN$positions)-N.atempnodes):ncol(DBN$positions)])
 
     range <- abs(max.axis - min.axis)
 
@@ -67,9 +77,9 @@ plotDBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
       label.positions <- c(label.positions, aux.label.positions + ep*sep)
     }
 
+    # Broken axis fixed
     labelS <- sprintf(rep(aux.label.positions, eps), fmt = '%#.1f')
     axis(break.axis, at=label.positions, labels=labelS)
     axis(as.numeric(xor(1,break.axis-1)) + 1)
-    # Broken axis fixed
   }
 }

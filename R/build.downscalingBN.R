@@ -163,7 +163,7 @@ build.downscalingBN <- function(data,
                                 parallelize = FALSE, n.cores= NULL, cluster.type = "FORK"
                                 ) {
 
-  if (!(is.character(structure.learning.algorithm))) { stop("Input algorithm name as character") }
+  if (!(is.character(structure.learning.algorithm))) {stop("Input algorithm name as character")}
   if (dynamic && epochs == 1){
     dynamic <- FALSE
     print("Dynamic with 1 epoch equals non dynamic.")
@@ -188,7 +188,8 @@ build.downscalingBN <- function(data,
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
 
-    structure.learning.steps <- parseStructureLearningStepsArg(structure.learning.steps, dynamic,
+    structure.learning.steps <- parseStructureLearningStepsArg(structure.learning.steps,
+                                                               dynamic,
                                                                remove.past.G)
     if (grepl("past", structure.learning.steps[1])) {
       int.dynamic.args.list <- list(remove.past.G = FALSE, epochs = epochs)
@@ -209,9 +210,13 @@ build.downscalingBN <- function(data,
     if (dynamic){
       structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
                                                             step.data$names.distribution,
-                                                            forbid.backwards, forbid.past.dynamic.GD,
+                                                            forbid.backwards,
+                                                            forbid.past.DD,
+                                                            forbid.past.dynamic.GD,
                                                             forbid.dynamic.GG,
-                                                            forbid.GG, forbid.DD, forbid.past.DD)
+                                                            forbid.GG,
+                                                            forbid.DD
+                                                            )
     }
   }
   else{ # Single or last step
@@ -222,9 +227,13 @@ build.downscalingBN <- function(data,
       # WARNING: addtoBlacklistDynamic() has yet force.closest.GD to be implemented
       # WARNING: addtoBlacklistDynamic() has yet forbid.GD to be implemented
       structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
-                                                            data$names.distribution, forbid.backwards,
-                                                            forbid.past.dynamic.GD, forbid.dynamic.GG,
-                                                            forbid.GG, forbid.DD, forbid.past.DD
+                                                            data$names.distribution,
+                                                            forbid.backwards,
+                                                            forbid.past.DD,
+                                                            forbid.past.dynamic.GD,
+                                                            forbid.dynamic.GG,
+                                                            forbid.GG,
+                                                            forbid.DD
                                                             )
     }
     else{
@@ -246,22 +255,10 @@ build.downscalingBN <- function(data,
   } else { distance <- NULL }
 
   structure.learning.args.list[["x"]] <- DATA
+  bn <- learnDAG(structure.learning.algorithm, structure.learning.args.list,
+                 parallelize, cluster.type, n.cores
+                )
 
-  alg <- strsplit(structure.learning.algorithm, split = ".", fixed = TRUE)[[1]][1]
-  if ( (alg == "gs") | (alg == "iamb") | (alg == "fast")  | (alg == "inter") | (alg == "inter")
-       | (alg == "pc") ) { # Constraint based, parallelizable
-    cl <- NULL
-    if ( parallelize ) { # constraint-based algorithms allow parallelization
-      cl <- parallelHandler(cluster.type, n.cores)
-      structure.learning.args.list[["cluster"]] <- cl
-    }
-    bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )
-    if (!(is.null(cl))) {stopCluster(cl)} # Stops parallel cluster
-  }
-  else if ( (alg == "mmhc") | (alg == "rsmax2") ) {
-    bn <- cextend( do.call(structure.learning.algorithm, structure.learning.args.list) )
-  } # Non parallelizable, needs cextend arc direction
-  else { bn <-  do.call(structure.learning.algorithm, structure.learning.args.list) } # Non parallelizable, already DAG (directed)
   if (steps.left == 0){
     bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method)
     print("Done building Bayesian Network.")

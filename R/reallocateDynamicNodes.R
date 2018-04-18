@@ -1,4 +1,5 @@
-reallocateDynamicNodes <- function(positions, names.distribution, break.axis = 1, Nepochs, separation.ratio = 0.1){
+reallocateDynamicNodes <- function(positions, names.distribution, break.axis = 1, Nepochs,
+                                   separation.ratio = 0.1){
 
   range <- abs(max(positions[break.axis, ]) - min(positions[break.axis,]))
   separation <- range + range*separation.ratio
