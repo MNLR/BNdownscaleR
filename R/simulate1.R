@@ -1,6 +1,9 @@
 simulate1 <- function(BN.fit, junction, evidence.nodes, evidence) {
 
-  if (length(evidence.nodes) != length(evidence)) {stop("Provide a single evidence for every evidence node.")}
+  if (length(evidence.nodes) != length(evidence)) {stop("Provide a single evidence for each
+                                                        evidence node.")}
+  names(evidence.nodes) <- NULL
+
   if (!identical(intersect(names(BN.fit), evidence.nodes), evidence.nodes)){
     stop("Some of the evidence.nodes are not present in the DAG.")
   }
@@ -19,6 +22,7 @@ simulate1 <- function(BN.fit, junction, evidence.nodes, evidence) {
   }
 
   dummydbn <- list(junction = junction, BN.fit = BN.fit)
+
   for (i in 1:length(mbn)){
     predictand <- mbn[[i]]$node
     PT <- queryBN(evidence = evidence, dbn = dummydbn, evidence.nodes = evidence.nodes,

@@ -53,8 +53,6 @@ distanceBias <- function(real, prediction, mdist = NULL, third = NULL, fourth = 
     fy <- predict(smf, fx)
   }
 
-
-
   if (plot_) {
     if (is.null(ylab)){ ylab <- measure }
     plot(mdist, val.r, main = title, xlab = "Distance", ylab = ylab, cex=cex, pch = 16, col = adjustcolor(colreal, alpha.f = alpha_), ylim = ylim)
@@ -74,7 +72,7 @@ distanceBias <- function(real, prediction, mdist = NULL, third = NULL, fourth = 
       colS <- c(colS, colfourth)
     }
 
-    if (show.legend){
+    if (show.legend && !(is.null(legend_))){
       legend("topright", legend = legend_, col = colS, pch = 16)
     }
 

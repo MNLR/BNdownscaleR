@@ -5,11 +5,12 @@ compileJunction <- function( bn.fit ){
       compile(as.grain(bn.fit), propagate = TRUE)
     },
     error=function(cond) {
-    message("Warning: junction could not be compiled. Cause: ")
+    message("Warning: junction could not be compiled. Exact inference deactivated.
+            Original message: ")
     message(cond)
     return(NA)
     }
   )
-  print("Done.")
+  print(" Done.")
   return(junction)
 }
