@@ -1,6 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
 .gitignore
 things.R
@@ -8,3 +9,5 @@ things.R
 data/*
 test*
 main.R
+oceano/*
+.RDataTmp

@@ -25,7 +25,7 @@ downscaleBN <- function(DBN, x, output = "probabilities",
   predictors <- names(BN$nodes)[1:Nglobal]
   predictands <- names(BN$nodes)[ -(1:Nglobal) ]
 
-  if (is.null(junction)) {
+  if (prediction.type == "exact" && is.null(junction)) {
     print("Junction was not compiled at training stage.")
     junction <- compileJunction( BN.fit )
     print("Done.")
