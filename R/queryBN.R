@@ -11,11 +11,11 @@ queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact",
     return( querygrain( object = evid, nodes = predictands, type = which_) )
   }
   else if (type == "simulation"){
-    return( simulate1(BN.fit = BN.fit, junction = junction,
-                                evidence.nodes = evidence.nodes,
-                                evidence = evidence)
-                      )
-
+    sim_ <- simulate1(BN.fit = BN.fit, junction = junction,
+                      evidence.nodes = evidence.nodes,
+                      evidence = evidence)
+    order.index <- match(predictands, names(sim_))
+    return( sim_[order.index] )
   }
   else if (type == "approximate"){
     lwsample <- cpdist( fitted = BN.fit, nodes = predictands,
