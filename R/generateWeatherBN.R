@@ -12,9 +12,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
   NY <- wg$NY
 
   if (is.null(junction) && !(is.null(inference.type))) {
-    print("Junction was not compiled at training stage.")
     junction <- compileJunction( BN.fit )
-    print("Done.")
   }
 
   if (!(is.null(initial))){
@@ -23,12 +21,8 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
     simulated <- initial
   }
   else{
-    print("Generating weather...")
     simulated <- rbn(wg$BN.fit, n=1)[ , unlist(wg$names.distribution[1:(epochs-1)])]
     series <- matrix(toOperableVector(simulated), nrow = epochs-1, ncol = NY, byrow = TRUE)
-
-    pb = txtProgressBar(min = 1, max = n+epochs, initial = 1)
-    setTxtProgressBar( pb, 1 )
 
     predictors <- unlist(wg$names.distribution[1:(epochs-1)])
     predictands <- wg$names.distribution[[length(wg$names.distribution)]]$y.names
@@ -36,7 +30,23 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
     colnames(series) <- predictands
 
     evidence_ <- c(t(series))
-    setTxtProgressBar(pb, epochs)
+    tt_ <- system.time(queryBN(evidence = evidence_, dbn = wg,
+                                evidence.nodes = predictors,
+                                predictands = predictands, type = "simulation"
+                                )
+                        )[3]*n
+    if (tt_ > 60){
+      tt_ <- paste0(list(as.character(floor(tt_/3600)), " hours and ", as.character(
+        floor((tt_ - floor(tt_/3600)*3600)/60) ),  " minutes."
+        ), collapse = ''
+      )
+      print(paste0("Process will approximately take ", tt_))
+    }
+
+    print("Generating series")
+    pb = txtProgressBar(min = 0, max = n, initial = 1, style = 3)
+    setTxtProgressBar(pb, 0 )
+
     for (epoch in 1:n){
       simulated <- queryBN(evidence = evidence_, dbn = wg,
                             evidence.nodes = predictors,
@@ -44,7 +54,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
                            )
       series <- rbind(series, toOperableVector(simulated))
       evidence_ <- c(t(series[ (nrow(series)-(epochs-2)):(nrow(series)) , ]))
-      setTxtProgressBar(pb, epoch + epochs + 1 )
+      setTxtProgressBar(pb, epoch )
     }
   }
 

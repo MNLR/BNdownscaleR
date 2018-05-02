@@ -13,8 +13,9 @@ buildWeatherGeneratorBN <- function(y,
                                     forbid.backwards = FALSE,
                                     forbid.past.DD = FALSE,
                                     return.intermediate = FALSE,
-                                    compile.junction = TRUE,
-                                    parallelize = FALSE, n.cores= NULL, cluster.type = "FORK") {
+                                    compile.junction = FALSE,
+                                    parallelize = FALSE, n.cores= NULL,
+                                    cluster.type = "FORK") {
 
   if (structure.learning.steps != 1){
     warning("Structure.learning.steps not implemented yet.")
