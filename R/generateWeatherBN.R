@@ -2,9 +2,6 @@
 
 generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
                                advance.type = "simulation"){
-  # initial expects a data.frame with columns names EQUAL to name.convention
-  # or | auto
-
   BN <- wg$BN
   BN.fit <- wg$BN.fit
   junction <- wg$junction
@@ -30,7 +27,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
   evidence_ <- c(t(series))
   tt_ <- system.time(queryBN(evidence = evidence_, dbn = wg,
                              evidence.nodes = predictors,
-                             predictands = predictands, type = "simulation"
+                             predictands = predictands, type = advance.type
                              )
                      )[3]*n
   if (tt_ > 60){
@@ -48,7 +45,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, inference.type = NULL,
   for (epoch in 1:n){
     simulated <- queryBN(evidence = evidence_, dbn = wg,
                          evidence.nodes = predictors,
-                         predictands = predictands, type = "simulation"
+                         predictands = predictands, type = advance.type
                          )
     series <- rbind(series, toOperableVector(simulated))
     evidence_ <- c(t(series[ (nrow(series)-(epochs-2)):(nrow(series)) , ]))
