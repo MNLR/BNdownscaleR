@@ -17,20 +17,22 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
   # grid$x.global
   # grid$y              are expected.
 
-    x.positions <- t(expand.grid(attributes(grid)$xyCoords$y, attributes(grid)$xyCoords$x ))[2:1, ]
-    nx <- NCOL(x.positions)
-    x.names <- mapply(paste0, array("G", nx), seq(1,nx), SIMPLIFY = TRUE, USE.NAMES = FALSE)
+  x.positions <- t(expand.grid(attributes(grid)$xyCoords$y, attributes(grid)$xyCoords$x ))[2:1, ]
+  nx <- NCOL(x.positions)
+  x.names <- mapply(paste0, array("G", nx), seq(1,nx), SIMPLIFY = TRUE, USE.NAMES = FALSE)
+  y.positions <- t(grid$y$xyCoords)
+  ny <- NCOL(y.positions)
+  if (!is.null(grid$y$Metadata$station_id)){
+    ynames_ <- grid$y$Metadata$station_id
+  } else { ynames_ <- seq(1,ny) }
+  y.names <- mapply(paste0, array("D", ny), ynames_ , SIMPLIFY = TRUE, USE.NAMES = FALSE)
 
-    y.positions <- t(grid$y$xyCoords)
-    ny <- NCOL(y.positions)
-    y.names <- mapply(paste0, array("D", ny), seq(1,ny), SIMPLIFY = TRUE, USE.NAMES = FALSE)
+  positions <- cbind( x.positions, y.positions )
+  colnames(positions) <- c(x.names, y.names)
+  rownames(positions) <- c("x","y")
 
-    positions <- cbind( x.positions, y.positions )
-    colnames(positions) <- c(x.names, y.names)
-    rownames(positions) <- c("x","y")
-
-    data <- cbind.data.frame(grid$x.global, grid$y$Data)
-    names(data) <- colnames(positions)
+  data <- cbind.data.frame(grid$x.global, grid$y$Data)
+  names(data) <- colnames(positions)
 
   if (rm.na){
     NCOL0 <- NCOL(data)
