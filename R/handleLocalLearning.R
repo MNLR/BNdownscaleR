@@ -1,6 +1,6 @@
 #' @export
-handleLocalLearning <- function(data, structure.learning.args.list, dynamic, keep.dynamic.distance,
-                                exceptions = NULL){
+handleLocalLearning <- function(data, structure.learning.args.list, dynamic = FALSE,
+                                keep.dynamic.distance = NULL, exceptions = NULL){
   distance <- structure.learning.args.list$distance
   positions <- data$positions
   if ( !(dynamic) ){
