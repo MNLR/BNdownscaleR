@@ -1,4 +1,3 @@
-
 #' prepare_predictors.forBN()
 #' @title
 #' @description
@@ -11,11 +10,12 @@
 #' @examples
 #' # Loading predictors
 
-
 prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observations" ) {
   # prepare.forBN() prepares standard climate4R grids, as output from prepare_predictors(), to be used for BN downscaling.
   # grid$x.global
   # grid$y              are expected.
+  # rm.na parameter should probably not be set to FALSE
+  # rm.na.mode shoud probably not be changed.
 
   x.positions <- t(expand.grid(attributes(grid)$xyCoords$y, attributes(grid)$xyCoords$x ))[2:1, ]
   nx <- NCOL(x.positions)
@@ -46,7 +46,7 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
     }
     else {
       NAS <- rowSums(is.na(data))
-      data <- data[ NAS == 0, ]
+      data <- data[ complete.cases(data) , ]
     }
 
     rc <- NCOL0 - NCOL(data)
@@ -59,6 +59,10 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
   # Makes sure data columns are factors.
   data[] <- lapply( data, factor) # the "[]" keeps the dataframe structure
   col_names <- names(data)
-
-  return( list(data = data, positions = positions, x.names = x.names, nx = nx, y.names = y.names, ny = ny, NAS = NAS ) )
+  pdata <- list(data = data, positions = positions, x.names = x.names, nx = nx,
+                y.names = y.names,
+                ny = ny, NAS = NAS
+                )
+  class(pdata) <- "pp.forBN"
+  return( pdata )
 }

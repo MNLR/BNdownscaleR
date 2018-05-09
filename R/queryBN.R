@@ -17,7 +17,8 @@ queryBN <- function( evidence, dbn, evidence.nodes, predictands, type = "exact",
     order.index <- match(predictands, names(sim_))
     return( sim_[order.index] )
   }
-  else if ((type == "exact" && (is.null(junction) || is.na(junction)) ) || type == "approximate"){
+  else if (( type == "exact" && (is.null(junction) || is.na(junction)) ) ||
+           type == "approximate"){
     lwsample <- cpdist( fitted = BN.fit, nodes = predictands,
              evidence = auxEvidenceTocpdistImput(evidence.nodes, evidence),
              method = 'lw', cluster = cl)

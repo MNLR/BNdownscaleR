@@ -57,6 +57,8 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
     GtoD <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "D", EdgeList[, 2]) )
     DtoG <- intersect(grep(pattern = "D", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
     GtoG <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
+    # TXtoTY <- intersect(grep(pattern = "T", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]))
+
 
     edge.color.pattern <- rep(edges.color[1], Nedges)
     if (length(edges.color) == 2) {

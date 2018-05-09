@@ -10,6 +10,24 @@
 
 prepareDataDynamicBN <- function(data, epochs){
 
+  if (class(data) == "splitSpellsNA"){
+    data <- lapply(data, function(sp, epochs) {
+                          if (nrow(sp$data) < epochs){
+                            return(NULL)
+                          } else {
+                            return(sp)
+                          }
+                         }, epochs = epochs
+
+            )
+    data[sapply(data, is.null)] <- NULL
+    proc <- lapply(data, FUN = prepareDataDynamicBN, epochs = epochs)
+    data <- proc[[1]]
+    data_ <- lapply(proc, FUN = function(x) {return(x$data)} )
+    data <- do.call( rbind, data_ )
+    return(data)
+  }
+
   # Data conversion
   dinamic.data <- data$data[ 1:( nrow(data$data)-(epochs-1) ) , ]
   names <- colnames(data$data)
@@ -24,9 +42,8 @@ prepareDataDynamicBN <- function(data, epochs){
                                      }, node = data$y.names, time = rep(0, data$ny)) ))
                               )
 
-
     for (epoch in 1:(epochs-1)) {
-      dinamic.data <- cbind.data.frame( dinamic.data  , data$data[ (epoch+1):(nrow(data$data)-(epochs-1-epoch)) , ] )
+      dinamic.data <- cbind.data.frame( dinamic.data, data$data[ (epoch+1):(nrow(data$data)-(epochs-1-epoch)) , ] )
       names <- c(names, colnames(data$data))
       layers <- c(layers, rep(epoch, nvars))
       names.distribution[[epoch + 1]] <- list(
@@ -69,7 +86,6 @@ prepareDataDynamicBN <- function(data, epochs){
     colnames(dinamic.data) <- unlist(names.distribution)
   }
 
-
   data$data <- dinamic.data
 
   # Others
@@ -79,6 +95,7 @@ prepareDataDynamicBN <- function(data, epochs){
   data[["positions"]] <- t(rep(1, epochs) %x% t(data$positions))
   colnames(data$positions) <- colnames(dinamic.data)
   rownames(data$positions) <- c("x","y")
+  class(data) <- "pp.forDynBN"
 
   return(data)
 }

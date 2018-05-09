@@ -2,9 +2,9 @@ simulate1 <- function(BN.fit, junction, evidence.nodes, evidence) {
 
   if (length(evidence.nodes) != length(evidence)) {stop("Provide a single evidence for each
                                                         evidence node.")}
-  names(evidence.nodes) <- NULL
-
-  if (!identical(intersect(names(BN.fit), evidence.nodes), evidence.nodes)){
+  if (!identical(sort(intersect(names(BN.fit), evidence.nodes)), sort(evidence.nodes))){
+    print(names(BN.fit))
+    print(evidence.nodes)
     stop("Some of the evidence.nodes are not present in the DAG.")
   }
   predictandS <- setdiff(names(BN.fit), evidence.nodes)

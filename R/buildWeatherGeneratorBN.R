@@ -1,6 +1,6 @@
 #' @export
 
-buildWeatherGeneratorBN <- function(y,
+buildWeatherGeneratorBN <- function(y, x = NULL,
                                     structure.learning.algorithm = "hc",
                                     structure.learning.args.list = list(),
                                     param.learning.method = "bayes",
@@ -10,79 +10,116 @@ buildWeatherGeneratorBN <- function(y,
                                     structure.learning.algorithm2 = NULL,
                                     structure.learning.args.list2 = list(),
                                     keep.dynamic.distance = TRUE,
+                                    remove.past.G = TRUE,
                                     forbid.backwards = FALSE,
+                                    forbid.past.dynamic.GD = TRUE,
+                                    forbid.dynamic.GG = FALSE,
                                     forbid.past.DD = FALSE,
                                     return.intermediate = FALSE,
                                     compile.junction = FALSE,
                                     parallelize = FALSE, n.cores= NULL,
                                     cluster.type = "FORK") {
+  # y may be a stations dataset or a pp.forBN class
 
-  if (structure.learning.steps != 1){
-    warning("Structure.learning.steps not implemented yet.")
+  if (is.null(x) && class(y) != "pp.forBN"){
+    if (structure.learning.steps != 1){
+      warning("Structure.learning.steps not implemented yet.")
+    }
+    steps.left <- 0
+
+    py <- prepare_Dataset_forDescriptiveBN(y)
+
+    print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
+
+    if ( epochs >= 2 & is.null(py$names.distribution) ) { # is.null(data$data) = TRUE when already processed for Dynamic
+      py <- prepareDataDynamicBN(py, epochs)
+    }
+    POS <- py$positions
+    NX <- py$nx
+    NY <- py$ny
+    DATA <- py$data
+
+    structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
+                                                          py$names.distribution,
+                                                          forbid.backwards,
+                                                          forbid.past.DD
+                                                          )
+
+    # if ( !(is.null(structure.learning.args.list$distance)) ){   # local learning
+    #   distance <- structure.learning.args.list$distance
+    #   if (is.null(step.data)) { step.data <- data }
+    #   structure.learning.args.list <- handleLocalLearning(step.data, structure.learning.args.list,
+    #                                                       dynamic, keep.dynamic.distance)
+    #   structure.learning.args.list$distance <- NULL
+    # } else { distance <- NULL }
+
+    structure.learning.args.list[["x"]] <- DATA
+    bn <- learnDAG(structure.learning.algorithm, structure.learning.args.list,
+                   parallelize, cluster.type, n.cores
+                  )
+
+    if (steps.left == 0){
+      bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method)
+      print("Done building Bayesian Network.")
+    }
+
+    if (compile.junction){
+      junction <- compileJunction(bn.fit)
+    } else { junction <- NULL }
+
+    marginals_ <- marginals( list(BN = bn, NX = NX, junction = junction,
+                                  training.data = DATA) )
+
+    dynamic.args.list <- list( epochs = epochs,
+                               forbid.backwards = forbid.backwards,
+                               forbid.past.DD = forbid.past.DD
+                              )
+    names.distribution <- py$names.distribution
+
+    #if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
+
+    wg <- list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit,
+               junction = junction,
+               dynamic.args.list = dynamic.args.list,
+               NX = NX, NY = NY, names.distribution = names.distribution,
+               marginals = marginals_,
+               structure.learning.algorithm = structure.learning.algorithm,
+               structure.learning.args.list = structure.learning.args.list,
+               param.learning.method = param.learning.method
+               )
+    class(wg) <- "Weather.Generator.BN"
   }
-  steps.left <- 0
+  else {
+    if (class(y) != "pp.forBN"){
+      y <- prepare_predictors.forBN(grid = prepare_predictors(x = x,y = y),
+                                    rm.na = TRUE, rm.na.mode = "observations"
+                                    )
+    }
+    y <- splitSpellsNA(y)
 
-  py <- prepare_Dataset_forDescriptiveBN(y)
-
-  print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
-
-  if ( epochs >= 2 & is.null(py$names.distribution) ) { # is.null(data$data) = TRUE when already processed for Dynamic
-    py <- prepareDataDynamicBN(py, epochs)
-  }
-  POS <- py$positions
-  NX <- py$nx
-  NY <- py$ny
-  DATA <- py$data
-
-  structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
-                                                        py$names.distribution,
-                                                        forbid.backwards,
-                                                        forbid.past.DD)
-
-  # if ( !(is.null(structure.learning.args.list$distance)) ){   # local learning
-  #   distance <- structure.learning.args.list$distance
-  #   if (is.null(step.data)) { step.data <- data }
-  #   structure.learning.args.list <- handleLocalLearning(step.data, structure.learning.args.list,
-  #                                                       dynamic, keep.dynamic.distance)
-  #   structure.learning.args.list$distance <- NULL
-  # } else { distance <- NULL }
-
-  structure.learning.args.list[["x"]] <- DATA
-  bn <- learnDAG(structure.learning.algorithm, structure.learning.args.list,
-                 parallelize, cluster.type, n.cores
-                )
-
-  if (steps.left == 0){
-    bn.fit <- bn.fit(bn, data = DATA, method = param.learning.method)
-    print("Done building Bayesian Network.")
+    wg <- build.downscalingBN(data = y,
+                              structure.learning.algorithm = structure.learning.algorithm,
+                              structure.learning.args.list = structure.learning.args.list,
+                              param.learning.method = param.learning.method,
+                              dynamic = TRUE,
+                              epochs = epochs,
+                              structure.learning.steps = structure.learning.steps,
+                              fix.intermediate = fix.intermediate,
+                              structure.learning.algorithm2 = structure.learning.algorithm2,
+                              structure.learning.args.list2 = structure.learning.args.list2,
+                              keep.dynamic.distance = keep.dynamic.distance,
+                              forbid.backwards = forbid.backwards,
+                              forbid.past.DD = forbid.past.DD,
+                              remove.past.G = remove.past.G,
+                              forbid.past.dynamic.GD = forbid.past.dynamic.GD,
+                              forbid.dynamic.GG = forbid.dynamic.GG,
+                              return.intermediate = return.intermediate,
+                              compile.junction = compile.junction,
+                              parallelize = parallelize, n.cores = n.cores,
+                              cluster.type = cluster.type
+                              )
+    class(wg) <- "Weather.Generator.G.BN"
   }
 
-  if (compile.junction){
-    junction <- compileJunction(bn.fit)
-  } else { junction <- NULL }
-
-  marginals_ <- marginals( list(BN = bn, NX = NX, junction = junction,
-                                training.data = DATA) )
-
-  dynamic.args.list <- list( epochs = epochs,
-                             forbid.backwards = forbid.backwards,
-                             forbid.past.DD = forbid.past.DD
-                            )
-  names.distribution <- py$names.distribution
-
-  #if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
-
-  wg <- list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit,
-              junction = junction,
-              dynamic.args.list = dynamic.args.list,
-              NX = NX, NY = NY, names.distribution = names.distribution,
-              marginals = marginals_,
-              structure.learning.algorithm = structure.learning.algorithm,
-              structure.learning.args.list = structure.learning.args.list,
-              param.learning.method = param.learning.method
-            )
-  attr(wg, "class") <- "Weather.Generator.BN"
   return(wg)
 }
-
-
