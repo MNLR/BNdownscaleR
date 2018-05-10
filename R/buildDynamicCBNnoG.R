@@ -17,27 +17,34 @@ buildDynamicCBNnoG <- function(y,
                                return.intermediate = FALSE,
                                compile.junction = FALSE,
                                parallelize = FALSE, n.cores= NULL,
-                               cluster.type = "FORK") {
+                               cluster.type = "FORK"){
+
+  if (epochs <= 1){
+    stop("epochs must be greater or equal than 2.")
+  }
 
   if (structure.learning.steps != 1){
     warning("Structure.learning.steps not implemented yet.")
   }
   steps.left <- 0
 
-  py <- prepare_Dataset_forDescriptiveBN(y)
+  y <- splitSpellsNA(prepare_Dataset_forDescriptiveBN(y))
 
-  print( paste0(paste0("Building Bayesian Network using ", structure.learning.algorithm) , "..." ) )
+  print( paste0(paste0("Building Bayesian Network using ",
+                       structure.learning.algorithm) , "..."
+                )
+         )
 
-  if ( epochs >= 2 & is.null(py$names.distribution) ) { # is.null(data$data) = TRUE when already processed for Dynamic
-    py <- prepareDataDynamicBN(py, epochs)
+  if (  class(y) != "pp.forDynBN" ) { # is.null(data$data) = TRUE when already processed for Dynamic
+    y <- prepareDataDynamicBN(y, epochs)
   }
-  POS <- py$positions
-  NX <- py$nx
-  NY <- py$ny
-  DATA <- py$data
+  POS <- y$positions
+  NX <- y$nx
+  NY <- y$ny
+  DATA <- y$data
 
   structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
-                                                        py$names.distribution,
+                                                        y$names.distribution,
                                                         forbid.backwards,
                                                         forbid.past.DD
   )
@@ -71,7 +78,7 @@ buildDynamicCBNnoG <- function(y,
                              forbid.backwards = forbid.backwards,
                              forbid.past.DD = forbid.past.DD
   )
-  names.distribution <- py$names.distribution
+  names.distribution <- y$names.distribution
 
 #if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
 
@@ -84,6 +91,6 @@ buildDynamicCBNnoG <- function(y,
              structure.learning.args.list = structure.learning.args.list,
              param.learning.method = param.learning.method
   )
-  class(wg) <- "Weather.Generator.BN"
+  class(wg) <- "DynamicCBNnoG"
   return(wg)
 }

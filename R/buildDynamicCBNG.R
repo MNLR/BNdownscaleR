@@ -29,21 +29,18 @@ buildDynamicCBNG <- function(y, x,
   }
   y <- splitSpellsNA(y)
 
-  if (remove.past.G){
-    forbid.dynamic.GG <- FALSE
-  }
 
-  if ( epochs >= 2 & is.null(data$names.distribution) ) { # is.null(data$data) = TRUE when already processed for Dynamic
-    data <- prepareDataDynamicBN(data, epochs)
+  if ( epochs >= 2 & is.null(y$names.distribution) ) { # MARCADO - usar clases
+    data_ <- prepareDataDynamicBN(y, epochs)
     if (remove.past.G) {
-      data <- purgePastGs(data, epochs)
+      data_ <- purgePastGs(data_, epochs)
       forbid.dynamic.GG <- FALSE
     }
   }
 
-  POS <- data$positions
-  NX <- data$nx
-  NY <- data$ny
+  POS <- data_$positions
+  NX <- data_$nx
+  NY <- data_$ny
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
@@ -65,7 +62,7 @@ buildDynamicCBNG <- function(y, x,
     # WARNING: addtoBlacklistDynamic() has yet force.closest.GD to be implemented
     # WARNING: addtoBlacklistDynamic() has yet forbid.GD to be implemented
     structure.learning.args.list <- addtoBlacklistDynamic(structure.learning.args.list,
-                                                          data$names.distribution,
+                                                          data_$names.distribution,
                                                           forbid.backwards,
                                                           forbid.past.DD,
                                                           forbid.past.dynamic.GD,
@@ -73,12 +70,12 @@ buildDynamicCBNG <- function(y, x,
                                                           forbid.GG,
                                                           forbid.DD
     )
-    DATA <- data$data
+    DATA <- data_$data
   }
 
   if ( !(is.null(structure.learning.args.list$distance)) ){   # local learning
     distance <- structure.learning.args.list$distance
-    if (is.null(step.data)) { step.data <- data }
+    if (is.null(step.data)) { step.data <- data_ }
     structure.learning.args.list <- handleLocalLearning(step.data,
                                                         structure.learning.args.list
     )
@@ -95,7 +92,7 @@ buildDynamicCBNG <- function(y, x,
     print("Done building Bayesian Network.")
   }
 
-  if ( steps.left >= 1){
+  if ( steps.left >= 1 ){
     print("Injecting next step into the DAG...")
     whitelist <- bn$arcs
     if (fix.intermediate){
@@ -120,7 +117,7 @@ buildDynamicCBNG <- function(y, x,
       structure.learning.args.list2$whitelist, whitelist
     )
 
-    DBN <-  buildDynamicCBN(data,
+    DBN <-  buildDynamicCBN(data_,
                             structure.learning.algorithm = structure.learning.algorithm2,
                             structure.learning.args.list = structure.learning.args.list2,
                             param.learning.method = param.learning.method,
@@ -147,7 +144,7 @@ buildDynamicCBNG <- function(y, x,
                             parallelize = parallelize,
                             n.cores= n.cores,
                             cluster.type = cluster.type
-    )
+                            )
 
     if (return.intermediate){
       if (steps.left == 2){
@@ -182,7 +179,7 @@ buildDynamicCBNG <- function(y, x,
                                forbid.dynamic.GG = forbid.dynamic.GG,
                                forbid.past.DD = forbid.past.DD
     )
-    names.distribution <- data$names.distribution
+    names.distribution <- data_$names.distribution
 
     if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
 
