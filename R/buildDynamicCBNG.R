@@ -11,6 +11,8 @@ buildDynamicCBNG <- function(y, x,
                             fix.intermediate = TRUE,
                             structure.learning.algorithm2 = NULL,
                             structure.learning.args.list2 = list(),
+                            structure.learning.algorithm3 = NULL,
+                            structure.learning.args.list3 = list(),
                             keep.dynamic.distance = TRUE,
                             remove.past.G = TRUE,
                             forbid.backwards = FALSE,
@@ -22,21 +24,24 @@ buildDynamicCBNG <- function(y, x,
                             parallelize = FALSE, n.cores= NULL,
                             cluster.type = "FORK") {
 
-  if (class(y) != "pp.forBN"){
-    y <- prepare_predictors.forBN(grid = prepare_predictors(x = x,y = y),
-                                  rm.na = TRUE, rm.na.mode = "observations"
-    )
-  }
-  y <- splitSpellsNA(y)
-
-
-  if ( epochs >= 2 & is.null(y$names.distribution) ) { # MARCADO - usar clases
-    data_ <- prepareDataDynamicBN(y, epochs)
-    if (remove.past.G) {
-      data_ <- purgePastGs(data_, epochs)
-      forbid.dynamic.GG <- FALSE
+  if (class(y) != "pp.forDynBN") {
+    if (class(y) != "pp.forBN"){
+      y <- prepare_predictors.forBN(grid = prepare_predictors(x = x,y = y),
+                                    rm.na = TRUE, rm.na.mode = "observations"
+      )
     }
+    y <- splitSpellsNA(y)
+
+    if ( epochs >= 2 ) { # MARCADO - usar clases
+      y <- prepareDataDynamicBN(y, epochs)
+      if (remove.past.G) {
+        y <- purgePastGs(y, epochs)
+        forbid.dynamic.GG <- FALSE
+      }
+    } else { stop("epochs must be greater than or equal to 2.") }
   }
+
+  data_ <- y
 
   POS <- data_$positions
   NX <- data_$nx
@@ -44,7 +49,14 @@ buildDynamicCBNG <- function(y, x,
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
-    hls <- handleLearningSteps(structure.learning.steps)
+    hls <- handleLearningSteps(data_, structure.learning.steps,
+                               structure.learning.args.list,
+                               structure.learning.algorithm,
+                               forbid.GG, forbid.DD,
+                               TRUE, remove.past.G, epochs, forbid.backwards,
+                               forbid.past.DD, forbid.past.dynamic.GD,
+                               forbid.dynamic.GG
+                              )
     structure.learning.steps <- hls$structure.learning.steps
     int.dynamic.args.list <- hls$int.dynamic.args.list
     step.data <- hls$step.data
@@ -73,7 +85,7 @@ buildDynamicCBNG <- function(y, x,
     DATA <- data_$data
   }
 
-  if ( !(is.null(structure.learning.args.list$distance)) ){   # local learning
+  if ( !(is.null(structure.learning.args.list$distance)) ){  # local learning
     distance <- structure.learning.args.list$distance
     if (is.null(step.data)) { step.data <- data_ }
     structure.learning.args.list <- handleLocalLearning(step.data,
@@ -102,7 +114,7 @@ buildDynamicCBNG <- function(y, x,
       )
     }
 
-    if (is.null(structure.learning.algorithm2) ){
+    if (is.null(structure.learning.algorithm2)){
       structure.learning.algorithm2 <- structure.learning.algorithm
     }
     if (steps.left == 2){
@@ -117,7 +129,7 @@ buildDynamicCBNG <- function(y, x,
       structure.learning.args.list2$whitelist, whitelist
     )
 
-    DBN <-  buildDynamicCBN(data_,
+    DBN <-  buildDynamicCBNG(data_,
                             structure.learning.algorithm = structure.learning.algorithm2,
                             structure.learning.args.list = structure.learning.args.list2,
                             param.learning.method = param.learning.method,
@@ -131,7 +143,6 @@ buildDynamicCBNG <- function(y, x,
                             fix.intermediate = fix.intermediate,
                             structure.learning.algorithm2 = structure.learning.algorithm3,
                             structure.learning.args.list2 = structure.learning.args.list3,
-                            dynamic = dynamic,
                             epochs = epochs,
                             remove.past.G = remove.past.G,
                             keep.dynamic.distance = keep.dynamic.distance,

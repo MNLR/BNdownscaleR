@@ -1,5 +1,5 @@
 
-handleLearningSteps <- function(data, step.data, structure.learning.steps,
+handleLearningSteps <- function(data, structure.learning.steps,
                                 structure.learning.args.list,
                                 structure.learning.algorithm,
                                 forbid.GG, forbid.DD,

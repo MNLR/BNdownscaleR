@@ -1,6 +1,10 @@
 
 #' @title Build a dynamic discrete Bayesian Network using climate data.
 #' @description
+#' @param y Either a Stations dataset, as output by \code{loadeR::loadStationData()}, or a
+#' "pp.forBN" class object (as output from \code{prepare_predictors.forBN()}).
+#' @param x By default \code{NULL}, can be used to provide a Grid dataset, as output by
+#'  \code{loadeR::loadGridData()}.
 #' @param structure.learning.algorithm Algorithm used to perform structure learning, with name
 #' as text. Supports all the score-based, constraint-based and hybrid bayesian network structure
 #' learning algorithms from \code{\link[bnlearn]{bnlearn}}.
@@ -82,26 +86,39 @@
 #'  refer to \code{\link[parallel]{parallel}} package.
 #'
 #' @details
+#' buildDynamicCBN() can be used with or without a Grid dataset. A Grid dataset may be specified
+#' by either using parameter \code{x} or using a "pp.forBN" class object (as output from
+#' \code{prepare_predictors.forBN()}) for parameter \code{y}. If none is specified the Bayesian
+#' Network may be used as a naive weather generator.
+#'
 #' \strong{Structure Learning Algorithms}
-#' Use \code{structure.learning.algorithm} to specify the algorithm for the structure (DAG) learning process.
+#' Use \code{structure.learning.algorithm} to specify the algorithm for the structure (DAG) learning
+#' process.
 #' Currently it DOES NOT support local discovery algorithms, expect malfuncion if used.
 #' List of supported algorithms:
-#' \code{"hc"}, \code{"tabu"} (score-based), \code{"gs"}, \code{"iamb"}, \code{"fast.iamb"}, \code{"inter.iamb"} (constraint-based),
+#' \code{"hc"}, \code{"tabu"} (score-based), \code{"gs"}, \code{"iamb"}, \code{"fast.iamb"},
+#' \code{"inter.iamb"} (constraint-based),
 #' \code{"mmhc"}, \code{"rsmax2"} (hybrid).
-#' Check their corresponding parameters in \code{\link[bnlearn]{bnlearn}}, arguments may be passed to the algorithm through
-#' the parameter structure.learning.args.list. Do not forget to set the distance argument in \code{structure.learning.args.list} for
+#' Check their corresponding parameters in \code{\link[bnlearn]{bnlearn}}, arguments may be
+#' passed to the algorithm through
+#' the parameter structure.learning.args.list. Do not forget to set the distance argument
+#' in \code{structure.learning.args.list} for
 #' local learning.
 #'
 #' \strong{Two or Three Step Learning}
 #' \itemize{
-#' \item \code{structure.learning.steps} allows to build separate DAGs for each set of nodes. Note that by employing the three
-#' \code{structure.learning.algorithm}, \code{structure.learning.algorithm2}, \code{structure.learning.algorithm3} arguments and their
-#' corresponding \code{structure.learning.args.list*} counterparts, many different configurations can be used for the structure learning
-#' process, e.g. by using grow-shrink for D nodes with distance set to 1, then injecting the left nodes using hill-climbing without distance
+#' \item \code{structure.learning.steps} allows to build separate DAGs for each set of nodes.
+#'  Note that by employing the three \code{structure.learning.algorithm},
+#'  \code{structure.learning.algorithm2}, \code{structure.learning.algorithm3} arguments and their
+#' corresponding \code{structure.learning.args.list*} counterparts, many different configurations
+#' can be used for the structure learning process, e.g. by using grow-shrink for D nodes with
+#' distance set to 1, then injecting the left nodes using hill-climbing without distance
 #' restriction.
-#' \item \code{fix.intermediate}, if set to \code{TRUE}, will forbid the creation of new arcs between nodes that were present in the previous
-#' learning step. E.g. if \code{structure.learning.steps = c("local", "global\-past")}, no new arcs between D nodes will be created in the
-#' second step, as the first DAG will be considered finished. If set to \code{FALSE}, the previous step DAG will be kept, but the next
+#' \item \code{fix.intermediate}, if set to \code{TRUE}, will forbid the creation of new arcs
+#' between nodes that were present in the previous learning step. E.g. if
+#' \code{structure.learning.steps = c("local", "global\-past")}, no new arcs between D nodes
+#' will be created in the second step, as the first DAG will be considered finished.
+#' If set to \code{FALSE}, the previous step DAG will be kept, but the next
 #' learning algorithm could create new arcs between D nodes over the first one.
 #' }
 #'
@@ -131,7 +148,7 @@
 #' @author MN Legasa
 #' @export
 #' @examples
-#' # Loading predictors
+
 buildDynamicCBN <- function(y, x = NULL,
                             structure.learning.algorithm = "hc",
                             structure.learning.args.list = list(),
@@ -144,7 +161,8 @@ buildDynamicCBN <- function(y, x = NULL,
                             fix.intermediate = TRUE,
                             structure.learning.algorithm2 = NULL,
                             structure.learning.args.list2 = list(),
-                            keep.dynamic.distance = TRUE,
+                            structure.learning.algorithm3 = NULL,
+                            structure.learning.args.list3 = list(),                            keep.dynamic.distance = TRUE,
                             remove.past.G = TRUE,
                             forbid.backwards = FALSE,
                             forbid.past.dynamic.GD = TRUE,
@@ -193,6 +211,8 @@ buildDynamicCBN <- function(y, x = NULL,
                              fix.intermediate = fix.intermediate,
                              structure.learning.algorithm2 = structure.learning.algorithm2,
                              structure.learning.args.list2 = structure.learning.args.list2,
+                             structure.learning.algorithm3 = structure.learning.algorithm3,
+                             structure.learning.args.list3 = structure.learning.args.list3,
                              keep.dynamic.distance = keep.dynamic.distance,
                              remove.past.G = remove.past.G,
                              forbid.backwards = forbid.backwards,
@@ -203,7 +223,7 @@ buildDynamicCBN <- function(y, x = NULL,
                              compile.junction = compile.junction,
                              parallelize = parallelize, n.cores= n.cores,
                              cluster.type = cluster.type
-                            )
+                             )
   }
 
   return(DCBN)

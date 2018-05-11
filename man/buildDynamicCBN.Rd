@@ -10,7 +10,9 @@ buildDynamicCBN(y, x = NULL, structure.learning.algorithm = "hc",
   force.closest.GD = NULL, closest.GD.direction = NULL, forbid.GD = FALSE,
   structure.learning.steps = 1, fix.intermediate = TRUE,
   structure.learning.algorithm2 = NULL,
-  structure.learning.args.list2 = list(), keep.dynamic.distance = TRUE,
+  structure.learning.args.list2 = list(),
+  structure.learning.algorithm3 = NULL,
+  structure.learning.args.list3 = list(), keep.dynamic.distance = TRUE,
   remove.past.G = TRUE, forbid.backwards = FALSE,
   forbid.past.dynamic.GD = TRUE, forbid.dynamic.GG = FALSE,
   forbid.past.DD = FALSE, return.intermediate = FALSE,
@@ -18,6 +20,12 @@ buildDynamicCBN(y, x = NULL, structure.learning.algorithm = "hc",
   cluster.type = "FORK")
 }
 \arguments{
+\item{y}{Either a Stations dataset, as output by \code{loadeR::loadStationData()}, or a
+"pp.forBN" class object (as output from \code{prepare_predictors.forBN()}).}
+
+\item{x}{By default \code{NULL}, can be used to provide a Grid dataset, as output by
+\code{loadeR::loadGridData()}.}
+
 \item{structure.learning.algorithm}{Algorithm used to perform structure learning, with name
 as text. Supports all the score-based, constraint-based and hybrid bayesian network structure
 learning algorithms from \code{\link[bnlearn]{bnlearn}}.
@@ -83,6 +91,13 @@ step if \code{structure.learning.steps} is employed. Ignored otherwise.}
 \item{structure.learning.args.list2}{Same as structure.learning.args.list for the second
 step if \code{structure.learning.steps} is employed. Ignored otherwise.}
 
+\item{structure.learning.algorithm3}{Same as structure.learning.algorithm for the third
+step if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.}
+
+\item{structure.learning.args.list3}{Same as structure.learning.args.list for the third step
+if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.
+See \code{Details}.}
+
 \item{keep.dynamic.distance}{When \code{dynamic = TRUE} and local learning is employed,
 if set to TRUE it will use its corresponding distance (See \code{Details}) between nodes
 from diferent epochs.}
@@ -116,38 +131,44 @@ detectCores()-1 if not set.}
 
 \item{cluster.type}{Either "PSOCK" or "FORK". Use the former under Windows systems,
 refer to \code{\link[parallel]{parallel}} package.}
-
-\item{structure.learning.algorithm3}{Same as structure.learning.algorithm for the third
-step if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.}
-
-\item{structure.learning.args.list3}{Same as structure.learning.args.list for the third step
-if \code{structure.learning.steps} with 3 steps is employed. Ignored otherwise.
-See \code{Details}.}
 }
 \value{
 An object of type DBN which contains the learnt Bayesian Network.
 }
 \details{
+buildDynamicCBN() can be used with or without a Grid dataset. A Grid dataset may be specified
+by either using parameter \code{x} or using a "pp.forBN" class object (as output from
+\code{prepare_predictors.forBN()}) for parameter \code{y}. If none is specified the Bayesian
+Network may be used as a naive weather generator.
+
 \strong{Structure Learning Algorithms}
-Use \code{structure.learning.algorithm} to specify the algorithm for the structure (DAG) learning process.
+Use \code{structure.learning.algorithm} to specify the algorithm for the structure (DAG) learning
+process.
 Currently it DOES NOT support local discovery algorithms, expect malfuncion if used.
 List of supported algorithms:
-\code{"hc"}, \code{"tabu"} (score-based), \code{"gs"}, \code{"iamb"}, \code{"fast.iamb"}, \code{"inter.iamb"} (constraint-based),
+\code{"hc"}, \code{"tabu"} (score-based), \code{"gs"}, \code{"iamb"}, \code{"fast.iamb"},
+\code{"inter.iamb"} (constraint-based),
 \code{"mmhc"}, \code{"rsmax2"} (hybrid).
-Check their corresponding parameters in \code{\link[bnlearn]{bnlearn}}, arguments may be passed to the algorithm through
-the parameter structure.learning.args.list. Do not forget to set the distance argument in \code{structure.learning.args.list} for
+Check their corresponding parameters in \code{\link[bnlearn]{bnlearn}}, arguments may be
+passed to the algorithm through
+the parameter structure.learning.args.list. Do not forget to set the distance argument
+in \code{structure.learning.args.list} for
 local learning.
 
 \strong{Two or Three Step Learning}
 \itemize{
-\item \code{structure.learning.steps} allows to build separate DAGs for each set of nodes. Note that by employing the three
-\code{structure.learning.algorithm}, \code{structure.learning.algorithm2}, \code{structure.learning.algorithm3} arguments and their
-corresponding \code{structure.learning.args.list*} counterparts, many different configurations can be used for the structure learning
-process, e.g. by using grow-shrink for D nodes with distance set to 1, then injecting the left nodes using hill-climbing without distance
+\item \code{structure.learning.steps} allows to build separate DAGs for each set of nodes.
+ Note that by employing the three \code{structure.learning.algorithm},
+ \code{structure.learning.algorithm2}, \code{structure.learning.algorithm3} arguments and their
+corresponding \code{structure.learning.args.list*} counterparts, many different configurations
+can be used for the structure learning process, e.g. by using grow-shrink for D nodes with
+distance set to 1, then injecting the left nodes using hill-climbing without distance
 restriction.
-\item \code{fix.intermediate}, if set to \code{TRUE}, will forbid the creation of new arcs between nodes that were present in the previous
-learning step. E.g. if \code{structure.learning.steps = c("local", "global\-past")}, no new arcs between D nodes will be created in the
-second step, as the first DAG will be considered finished. If set to \code{FALSE}, the previous step DAG will be kept, but the next
+\item \code{fix.intermediate}, if set to \code{TRUE}, will forbid the creation of new arcs
+between nodes that were present in the previous learning step. E.g. if
+\code{structure.learning.steps = c("local", "global\-past")}, no new arcs between D nodes
+will be created in the second step, as the first DAG will be considered finished.
+If set to \code{FALSE}, the previous step DAG will be kept, but the next
 learning algorithm could create new arcs between D nodes over the first one.
 }
 
@@ -173,9 +194,6 @@ with \code{structure.learning.args.list$whitelist} and
 \strong{Aditional details}
 Parameters \code{output.marginals} and \code{compile.junction} are useful to save time if the
  user only intends to visualize the DAG.
-}
-\examples{
-# Loading predictors
 }
 \author{
 MN Legasa

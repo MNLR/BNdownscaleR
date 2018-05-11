@@ -134,7 +134,7 @@ buildCBN <- function(data,
   steps.left <- 0
 
   if (!is.null(structure.learning.steps) && structure.learning.steps != 1){
-    hls <- handleLearningSteps(data, step.data, structure.learning.steps,
+    hls <- handleLearningSteps(data, structure.learning.steps,
                                structure.learning.args.list,
                                structure.learning.algorithm,
                                forbid.GG, forbid.DD
