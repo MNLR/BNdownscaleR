@@ -90,7 +90,9 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
     n <- nrow(x) - (x.at)
     x <- x[(x.at+1):nrow(x), ]
   }
-  print("st")
+  else {
+    evidence_ <- initial
+  }
   series <- toOperableMatrix(initial)
   colnames(series) <- predictands    #evidence_ <- c( c(t(x))[1:sum(past.present.G)], evidence_ )
 
@@ -107,11 +109,11 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
     print(paste0("Process will approximately take ", tt_))
   }
 
-  print("Generating series...")
+  maux_ <- paste0(paste0("Generating series of ", as.character(n)), " days ..." )
+  print(maux_)
   pb = txtProgressBar(min = 0, max = n, initial = 1, style = 3)
   setTxtProgressBar(pb, 0)
-   print(n)
-   print(nrow(x))
+
   for (epoch in 1:n){
     simulated <- queryBN(evidence = evidence_, dbn = wg,
                          evidence.nodes = predictors,
