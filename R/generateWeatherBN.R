@@ -1,7 +1,8 @@
 #' @export
 
 generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.type = NULL,
-                               advance.type = "simulation"){
+                               advance.type = "simulation", threshold.vector = 0.5,
+                               event = "1"){
   # expects x in the form prepare_newdata(newdata = tx, predictor = grid)
   # n overriden when x is not NULL.
 
@@ -86,9 +87,9 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
       )
       initial <- toOperableMatrix(initial)
       evidence_ <- c(c(t(x[1:x.at, ])), initial)
+      n <- nrow(x) - (x.at)
+      x <- x[(x.at+1):nrow(x), ]
     }
-    n <- nrow(x) - (x.at)
-    x <- x[(x.at+1):nrow(x), ]
   }
   else {
     evidence_ <- initial
@@ -109,7 +110,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
     print(paste0("Process will approximately take ", tt_))
   }
 
-  maux_ <- paste0(paste0("Generating series of ", as.character(n)), " days ..." )
+  maux_ <- paste0(paste0("Generating series of ", as.character(n)), " slices ..." )
   print(maux_)
   pb = txtProgressBar(min = 0, max = n, initial = 1, style = 3)
   setTxtProgressBar(pb, 0)
@@ -119,6 +120,15 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
                          evidence.nodes = predictors,
                          predictands = predictands, type = advance.type
                         )
+    if (advance.type == "exact"){
+      simulated <- simplify2array( sapply(simulated, simplify2array,
+                                                simplify = FALSE),
+                                         higher = TRUE
+                                 )
+      simulated <- simulated[ ,match(predictands, colnames(simulated))]
+      simulated <- is.mostLikelyEvent(simulated, event, threshold.vector)
+    }
+
     series <- rbind(series, toOperableVector(simulated))
     evidence_ <- c(t(series[ (nrow(series)-(epochs-2)):(nrow(series)) , ]))
     if (!is.null(x) && epoch != n){
