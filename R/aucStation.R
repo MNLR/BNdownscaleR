@@ -35,5 +35,7 @@ aucStation <- function(downscaled, realData, is.event = FALSE,
     attr(aucS, "YIS") <- YIS
   }
   names(aucS) <- station.names
+  attr(aucS, "summary") <- c(min(aucS), max(aucS), mean(aucS), sd(aucS))
+  names(attr(aucS, "summary")) <- c("min", "max", "mean", "sd")
   return(aucS)
 }

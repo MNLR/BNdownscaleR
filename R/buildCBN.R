@@ -103,9 +103,10 @@
 #' Parameters \code{output.marginals} and \code{compile.junction} are useful to save time
 #'  if the user only intends to visualize the DAG.
 #' @return An object of type DBN which contains the learnt Bayesian Network.
-#' @author MN Legasa
+#' @author Mikel N Legasa
 #' @export
 #' @examples
+#' # Not yet
 #' # Loading predictors
 
 buildCBN <- function(data,

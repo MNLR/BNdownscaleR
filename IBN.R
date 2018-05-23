@@ -11,10 +11,10 @@ loginUDG('Mitor', '450cacahuetes')                #
 ###################################################
 
 ### datasets
-#y <- loadStationData('/home/w/Dropbox/R/BNdownscale/data/VALUE/AEMET', var = "precip")
+# y <- loadStationData('/home/w/Dropbox/R/BNdownscale/data/VALUE/AEMET', var = "precip")
 #di <-dataInventory('http://meteo.unican.es/tds5/dodsC/interim/interim075.ncml')
 # x <- loadGridData('http://meteo.unican.es/tds5/dodsC/interim/interim075.ncml', var = 'tp',
-#                    lonLim = c(-7,-1), latLim = 43.5, time = "DD" ,aggr.d = "mean")
+#                    lonLim = c(-7,-1), latLim = 43.5, time = "DD", aggr.d = "mean")
 # # Traslado de grid
 # # x <- interpGrid(x, new.coordinates = list(x = x$xyCoords$x, y = x$xyCoords$y + 0.25), method = "nearest")
 # # x$xyCoords$y <- x$xyCoords$y + 0.25
@@ -40,14 +40,15 @@ loginUDG('Mitor', '450cacahuetes')                #
 
 load("data/AEMET_precip.RData") # loads y
 
-load("data/grid.RData") # loads grid
+# grid <- grid2
+load("data/grid.RData") # loads grid, contains trimmed grid
 data <- prepare_predictors.forBN(grid = grid, rm.na = TRUE, rm.na.mode = "observations")
 
 descbn <- buildDescriptiveCBN(y,
-                              structure.learning.algorithm = "hc",
-                              structure.learning.args.list = list(distance = 0.5)
+                              structure.learning.algorithm = "hc"
                               )
-plotCBN(descbn, dev = TRUE, nodes = 1)
+plotCBN(descbn, dev = TRUE)
+ry <- rbn(descbn$BN.fit, n = 4800)
 
 dbn <- buildCBN(data)
 
@@ -68,30 +69,34 @@ dbncomplex <- buildCBN(data,
 plotCBN(dbn, dev = TRUE)
 plotCBN(dbncomplex$intermediateDBN1, dev = TRUE, nodes = 1)
 plotCBN(dbncomplex, dev = TRUE)
-# exp.name <- "phiCG.pdf"
+# exp.name <- "IB.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 30, height = 15)
 
-tx <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "prd")
-ty <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "obs")
-test <- prepare_newdata(newdata = tx, predictor = grid)
+# tx <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "prd")
+# ty <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "obs")
+# test2 <- prepare_newdata(newdata = tx, predictor = grid2)
+# test2 needs removal of G nodes (remove odd)
+# eq.:
+load("data/testIB.RData")
 
 ###
 ### Prediction
 ###
 pycomplex <- downscaleBN(dbncomplex, x = test, output = "probabilities", prediction.type = "exact",
-                         parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
+                         parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 py <- downscaleBN(dbn, x = test, output = "probabilities", prediction.type = "exact",
-                  parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
+                  parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 
 ###
 ### Simulation
 ###
 sy <- downscaleBN(dbn, x = test,
                         prediction.type = "simulation",
-                        parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
+                        parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 
-dbnaucS <- aucStation(prediction = py$member_1, realData = ty$Data, plot.curves = TRUE)
-pye <- convertEvent( py$member_1, threshold.vector = 0.5 )
+dbnaucS <- aucStation(downscaled = py$member_1, realData = ty$Data, plot.curves = TRUE)
+c.thresholds <- findClimatologyThreshold(py$member_1, event.marginalS = dbn$marginals)
+pye <- convertEvent( py$member_1, threshold.vector = c.thresholds )
 
 cTableRates(cTable(predicted = pye, real = ty$Data))
 cTable(predicted = pye, real = ty$Data)

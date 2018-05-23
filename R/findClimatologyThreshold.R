@@ -5,9 +5,10 @@ findClimatologyThreshold <- function(Probability.Table, event.marginalS, event =
   disc <- seq(0, 1, length.out = points)
   climatologieS <- lapply(disc,
                           FUN = function(thr, Probability.Table, event){
-                                         evS <- convertEvent(Probability.Table = Probability.Table,
-                                                             event = event, threshold.vector = thr
-                                                            )
+                                         evS <- convertEvent(
+                                           Probability.Table = Probability.Table,
+                                           event = event, threshold.vector = thr
+                                         )
                                          return( apply(X = evS, MARGIN = 2,
                                                        FUN = function(estev){
                                                               tab <- table(estev)
@@ -22,16 +23,27 @@ findClimatologyThreshold <- function(Probability.Table, event.marginalS, event =
                                                 )
                                   }, Probability.Table = Probability.Table, event = event
                           )
-  climatologieS <- as.data.frame(t(sapply(X = climatologieS, c)))
+  climatologieS <- as.data.frame( (t(sapply(X = climatologieS, c))) )
+  events.index <- apply(attributes(event.marginalS)$names,
+                          MARGIN = 2, function(x) {
+                            return(which(x == event))
+                          }
+                        )
+  marginalS <- rep(0, length(events.index))
+  for (i in seq(1,length(events.index))){
+    marginalS[i] <- as.numeric(event.marginalS[ as.vector(events.index)[i], i ])
+  }
+
   bestS <- mapply(FUN = function(estev, marginal){
                            return(
                              unique(
-                               estev[which(min(abs(estev - marginal)) == abs(estev - marginal) )]
-                             )
+                               estev[which(min(abs(estev - marginal)) ==
+                                             abs(estev - marginal) )
+                                     ]
+                             )[1]
                            )
-                        }, estev = climatologieS, marginal = event.marginalS
+                        }, estev = climatologieS, marginal = marginalS
            )
 
   return(bestS)
-
 }
