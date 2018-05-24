@@ -1,80 +1,78 @@
 #' @export
 
-distanceBias <- function(real, prediction, mdist = NULL, third = NULL, fourth = NULL,
-                         measure = "phiCoef",
-                         val.r = NULL, val.p = NULL, val.t = NULL, val.f = NULL,
+distanceBias <- function(real,  predictions = NULL, mdist = NULL,
+                         measure = "phiCoef", return.measureMatrix = TRUE,
                          title = NULL, ylab = NULL,
-                         plot_ = TRUE,
-                         colpred = "red", colreal = "black", colthird="blue", colfourth="green",
-                         alpha_ = 0.25, lwd=5, cex =1.5,
+                         colors = c("black", "red", "blue", "green", "cyan","yellow","pink"),
+                         alpha_ = 0.25, lwd = 5, cex = 1.5,
                          show.legend = TRUE, legend_ = NULL,
                          ...) {
+
+  # predictions may be a list of matrices, a matrix or NULL for just plotting real.
+  # measure may be a list of measureMatrix outputs.
 
   if ( is.null(mdist) && is.list(real) && !is.null(real$xyCoords) ){
     mdist <- measureMatrix(real, measure = "distance")
   } else {
     if (is.null(mdist)){ stop("real$xyCoords is not present and no mdist was provided.") }
   }
-  if ( is.null(val.r) ){
-    val.r <- measureMatrix(real, measure = measure, ... = ...)
-  }
-  if ( is.null(val.p) ){
-    val.p <- measureMatrix(prediction, measure = measure, ... = ...)
+
+  if (!is.matrix(real)){
+    real <- measureMatrix(real, measure = measure, ... = ...)
   }
 
-  ylim <- c(min(c(as.vector(val.r), as.vector(val.p)), na.rm = TRUE), max(c(as.vector(val.r), as.vector(val.p)), na.rm = TRUE))
-
-  # REAL
-  D <- data.frame(mm=as.vector(val.r), dist=as.vector(mdist))
-  smf <- loess(mm~ dist, D)
-  rx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out = 10000)
-  ry <- predict(smf, rx)
-
-  # PREDICTS
-  D <- data.frame(mm=as.vector(val.p), dist=as.vector(mdist))
-  smf <- loess(mm~ dist, D)
-  px <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out = 10000)
-  py <- predict(smf, px)
-
-  # THIRD
-  if (!is.null(third)){
-    val.t <- measureMatrix(third, measure = measure, ... = ...)
-    D <- data.frame(mm=as.vector(val.t), dist=as.vector(mdist))
-    smf <- loess(mm~ dist, D)
-    tx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out=10000)
-    ty <- predict(smf, tx)
-  }
-  # FOURTH
-  if (!is.null(fourth)){
-    val.f <- measureMatrix(fourth, measure = measure, ... = ...)
-    D <- data.frame(mm=as.vector(val.f), dist=as.vector(mdist))
-    smf <- loess(mm~ dist, D)
-    fx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out=10000)
-    fy <- predict(smf, fx)
-  }
-
-  if (plot_) {
-    if (is.null(ylab)){ ylab <- measure }
-    plot(mdist, val.r, main = title, xlab = "Distance", ylab = ylab, cex=cex, pch = 16, col = adjustcolor(colreal, alpha.f = alpha_), ylim = ylim)
-    points(mdist, val.p, cex=cex, pch = 16, col = adjustcolor(colpred, alpha.f = alpha_))
-    points(rx, ry, type = 'l', lwd=lwd, col = colreal)
-    points(px, py, type = 'l', lwd=lwd, col = colpred)
-
-    colS <- c(colreal, colpred)
-    if (!is.null(third)) {
-      points(mdist, val.t, cex=cex, pch = 16, col = adjustcolor(colthird, alpha.f = alpha_))
-      points(tx, ty, type = 'l', lwd=lwd, col = colthird)
-      colS <- c(colS, colthird)
+  if (!is.null(predictions)) {   # CORREGIR AQUI
+    if (!is.list(predictions)){
+        predictions <- list( measureMatrix(predictions, measure = measure, ... = ...) )
     }
-    if (!is.null(fourth)) {
-      points(mdist, val.f, cex=cex, pch = 16, col = adjustcolor(colfourth, alpha.f = alpha_))
-      points(fx, fy, type = 'l', lwd=lwd, col = colfourth)
-      colS <- c(colS, colfourth)
+    else {
+        predictions <- lapply(predictions, FUN = measureMatrix, measure = measure, ... = ...)
     }
-
-    if (show.legend && !(is.null(legend_))){
-      legend("topright", legend = legend_, col = colS, pch = 16)
-    }
-
+    ylim <- c( min( unlist(c(real, predictions)), na.rm = TRUE ),
+               max( unlist(c(real, predictions)), na.rm = TRUE )
+    )
   }
+  else {ylim = NULL}
+
+  ylab <- measure
+  plotDistanceMeasure(real, mdist = mdist, ylim = ylim, title = title, ylab = ylab,
+                      color = colors[1], alpha_ = alpha_, lwd = lwd, cex = cex, pch = 16)
+
+  if (!is.null(predictions)){
+    mapply(plotDistanceMeasure, predictions, color = colors[2:(length(predictions)+1) ],
+           MoreArgs = list( mdist = mdist, ylim = ylim, points = TRUE, title = NULL,
+                            alpha_ = alpha_, lwd = lwd, cex = cex, pch = 16, ... = ... )
+          )
+  }
+  if (show.legend && !(is.null(legend_))){
+    legend("topright", legend = legend_, col = colors, pch = 16)
+  }
+
+  if (return.measureMatrix){
+    return( list(real = real, predictions = predictions, mdist = mdist) )
+  }
+}
+
+
+plotDistanceMeasure <- function(measure.matrix, mdist, ylim, ylab = NULL,
+                                points = FALSE, title = NULL,
+                                color = "black", alpha_ = 0.25, lwd = 5,
+                                cex = 1.5, pch = 16, ... ) {
+
+  D <- data.frame(mm = as.vector(measure.matrix), dist = as.vector(mdist))
+
+  smf <- loess(mm ~ dist, D)
+  loessx <- seq(min(D$dist, na.rm = TRUE), max(D$dist, na.rm = TRUE), length.out = 10000)
+  loessy <- predict(smf, loessx)
+
+  if (!points){
+    plot(mdist, measure.matrix, main = title, xlab = "Distance", ylab = ylab,
+         cex=cex, pch = pch , col = adjustcolor(color, alpha.f = alpha_), ylim = ylim
+    )
+  } else {
+    points(mdist, measure.matrix, main = title, xlab = "Distance",
+           cex=cex, pch = pch , col = adjustcolor(color, alpha.f = alpha_), ylim = ylim
+    )
+  }
+  points(loessx, loessy, type = 'l', lwd = lwd, col = color)
 }

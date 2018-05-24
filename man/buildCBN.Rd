@@ -137,8 +137,9 @@ Parameters \code{output.marginals} and \code{compile.junction} are useful to sav
  if the user only intends to visualize the DAG.
 }
 \examples{
+# Not yet
 # Loading predictors
 }
 \author{
-MN Legasa
+Mikel N Legasa
 }
