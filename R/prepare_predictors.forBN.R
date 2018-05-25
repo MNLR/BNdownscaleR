@@ -1,7 +1,7 @@
 #' prepare_predictors.forBN()
 #' @title
 #' @description
-#' @param grod Expects output from \code{\link[downscaleR]{prepare_predictors}}.
+#' @param grid Expects output from \code{\link[downscaleR]{prepare_predictors}}.
 #'
 #' @details
 #' @return A processed dataset to be passed to build.downscalingBN().
@@ -43,10 +43,14 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
       positions <- positions[ , NAS == 0]
       nx <- length(grep("G", colnames(positions)))
       ny <- length(grep("D", colnames(positions)))
+      dates <- grid$y$Dates
     }
     else {
       NAS <- rowSums(is.na(data))
       data <- data[ complete.cases(data) , ]
+      dates <- list(start = grid$y$Dates$start[NAS == 0],
+                    end = grid$y$Dates$end[NAS == 0]
+                    )
     }
 
     rc <- NCOL0 - NCOL(data)
@@ -54,15 +58,16 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
     if (rc != 0){ print(paste0("Removed ", rc , " stations which contained NA values.")) }
     if (rr != 0){ print(paste0("Removed ", rr , " observations with NA values." ))}
   }
-  else {NAS = NULL}
+  else { NAS = NULL }
 
   # Makes sure data columns are factors.
   data[] <- lapply( data, factor) # the "[]" keeps the dataframe structure
   col_names <- names(data)
   pdata <- list(data = data, positions = positions, x.names = x.names, nx = nx,
-                y.names = y.names,
-                ny = ny, NAS = NAS
+                y.names = y.names, ny = ny, NAS = NAS, dates = grid$y$Dates
                 )
+
   class(pdata) <- "pp.forBN"
+
   return( pdata )
 }

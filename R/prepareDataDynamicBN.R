@@ -11,6 +11,7 @@
 prepareDataDynamicBN <- function(data_, epochs){
 
   if (class(data_) == "splitSpellsNA"){
+    dates <- data_[[1]]$dates
     data.list <- lapply(data_, function(sp, epochs) {
                           if (nrow(sp$data) < epochs) {
                             return(NULL)
@@ -27,6 +28,9 @@ prepareDataDynamicBN <- function(data_, epochs){
     data_out <- proc[[1]]
     data_ <- lapply(proc, FUN = function(x) {return(x$data)} )
     data_out$data <- do.call( rbind, data_ )
+    data_out[["dates"]] <- dates$start[as.numeric(rownames(data_out$data))]
+    rownames(data_out$data) <- dates$start[as.numeric(rownames(data_out$data))]
+
     return(data_out)
   }
   else {

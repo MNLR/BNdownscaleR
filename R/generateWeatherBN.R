@@ -1,17 +1,18 @@
 #' @export
 
 generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.type = NULL,
+                               initial.date = NULL,
                                advance.type = "simulation", threshold.vector = 0.5,
                                event = "1"){
   # expects x in the form prepare_newdata(newdata = tx, predictor = grid)
   # n overriden when x is not NULL.
-
   BN <- wg$BN
   BN.fit <- wg$BN.fit
   junction <- wg$junction
   epochs <- wg$dynamic.args.list$epochs
   NY <- wg$NY
   NX <- wg$NX
+
 
   if (!is.null(x)){
     if (is.list(x)){
@@ -97,6 +98,8 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
   series <- toOperableMatrix(initial)
   colnames(series) <- predictands    #evidence_ <- c( c(t(x))[1:sum(past.present.G)], evidence_ )
 
+  step.size <- difftime( rownames(cosa$training.data)[2], rownames(cosa$training.data)[1] , units = "secs")
+
   tt_ <- system.time(queryBN(evidence = evidence_, dbn = wg,
                              evidence.nodes = predictors,
                              predictands = predictands, type = advance.type
@@ -142,6 +145,17 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
                                       split = paste0(".T", as.character(epochs-1))
                                       )
                             )
-  rownames(series) <- seq(-(epochs-2), n)
+
+  if (!(is.null(initial.date))){
+    rownames(series)[1:(nrow(series)-n)] <- as.character(as.POSIXct(initial.date[1:(length(initial.date)-1)],
+                                                       format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+                                            )
+    rownames(series)[(nrow(series)-n+1):nrow(series)] <- as.character(as.POSIXct(initial.date[length(initial.date)],
+                                                                    format = "%Y-%m-%d %H:%M:%S", tz = "UTC"
+                                                                    ) + seq(step.size, by = step.size, length.out = n)
+                                                          )
+  }
+  else{ rownames(series) <- seq(-(epochs-2), n) }
+
   return(series)
 }

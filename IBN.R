@@ -12,7 +12,7 @@ loginUDG('Mitor', '450cacahuetes')                #
 
 ### datasets
 # y <- loadStationData('/home/w/Dropbox/R/BNdownscale/data/VALUE/AEMET', var = "precip")
-#di <-dataInventory('http://meteo.unican.es/tds5/dodsC/interim/interim075.ncml')
+# di <-dataInventory('http://meteo.unican.es/tds5/dodsC/interim/interim075.ncml')
 # x <- loadGridData('http://meteo.unican.es/tds5/dodsC/interim/interim075.ncml', var = 'tp',
 #                    lonLim = c(-7,-1), latLim = 43.5, time = "DD", aggr.d = "mean")
 # # Traslado de grid
@@ -33,7 +33,7 @@ loginUDG('Mitor', '450cacahuetes')                #
 ##    EQUALS
 ##
 
- load("data/interim075_43_43.75_-7_-1_DDmean.RData") # loads x (complete grid)
+load("data/interim075_43_43.75_-7_-1_DDmean.RData") # loads x (complete grid)
 # load("data/AEMET_precip.RData") # loads y
 # ##
 # grid2 <- prepare_predictors(x = x,y = y)
@@ -51,6 +51,8 @@ plotCBN(descbn, dev = TRUE)
 ry <- rbn(descbn$BN.fit, n = 4800)
 
 dbn <- buildCBN(data)
+dbn.mle <- buildCBN(data, param.learning.method = "mle")
+
 
 dbncomplex <- buildCBN(data,
                        structure.learning.algorithm = "mmhc",
@@ -69,7 +71,7 @@ dbncomplex <- buildCBN(data,
 plotCBN(dbn, dev = TRUE)
 plotCBN(dbncomplex$intermediateDBN1, dev = TRUE, nodes = 1)
 plotCBN(dbncomplex, dev = TRUE)
-# exp.name <- "IB.pdf"
+# exp.name <- "wgIB.G.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 30, height = 15)
 
 # tx <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "prd")
@@ -102,6 +104,10 @@ cTableRates(cTable(predicted = pye, real = ty$Data))
 cTable(predicted = pye, real = ty$Data)
 distanceBias(real = ty, prediction = pye)
 
-#aucvs(realData = ty$Data, downscaled = py$member_1, downscaled2 = sy$member_1,
-#         is.event2 = TRUE)
+library(verification)
+pyba <- purgeBinAbsence(probabilities = py$member_1)
 
+dev.new()
+aux <- verify(ty$Data[,1], pyba[,1], frcst.type = "prob", obs.type = "binary",
+              thresholds = seq(0,1, by = 0.05))
+reliability.plot(aux, titl = "Reliability plot, IB")
