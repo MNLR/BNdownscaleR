@@ -16,6 +16,7 @@ toOperableMatrix <- function(data) {
     else {
       stop("Attempted to convert an unrecognizable object.")
     }
+    rownames(pdata) <- rownames(data)
     colnames(pdata) <- colnames(data)
 
     for (i in 1:ncol(pdata)){
