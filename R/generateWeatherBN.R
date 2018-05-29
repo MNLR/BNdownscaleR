@@ -98,7 +98,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
   series <- toOperableMatrix(initial)
   colnames(series) <- predictands    #evidence_ <- c( c(t(x))[1:sum(past.present.G)], evidence_ )
 
-  step.size <- difftime( rownames(cosa$training.data)[2], rownames(cosa$training.data)[1] , units = "secs")
+  step.size <- difftime( rownames(wg$training.data)[2], rownames(wg$training.data)[1] , units = "secs")
 
   tt_ <- system.time(queryBN(evidence = evidence_, dbn = wg,
                              evidence.nodes = predictors,
