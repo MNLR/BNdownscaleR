@@ -4,7 +4,7 @@
 \alias{buildDynamicCBN}
 \title{Build a dynamic discrete Bayesian Network using climate data.}
 \usage{
-buildDynamicCBN(y, x = NULL, structure.learning.algorithm = "hc",
+buildDynamicCBN(y, x = NULL, structure.learning.algorithm = "tabu",
   structure.learning.args.list = list(), param.learning.method = "bayes",
   epochs = 2, forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
   force.closest.GD = NULL, closest.GD.direction = NULL, forbid.GD = FALSE,

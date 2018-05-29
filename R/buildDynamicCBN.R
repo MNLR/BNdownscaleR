@@ -150,7 +150,7 @@
 #' @examples
 
 buildDynamicCBN <- function(y, x = NULL,
-                            structure.learning.algorithm = "hc",
+                            structure.learning.algorithm = "tabu",
                             structure.learning.args.list = list(),
                             param.learning.method = "bayes",
                             epochs = 2,

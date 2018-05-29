@@ -45,14 +45,11 @@ load("data/AEMET_precip.RData") # loads y
 load("data/grid.RData") # loads grid, contains trimmed grid
 data <- prepare_predictors.forBN(grid = grid, rm.na = TRUE, rm.na.mode = "observations")
 
-descbn <- buildDescriptiveCBN(y,
-                              structure.learning.algorithm = "hc"
-                              )
+descbn <- buildDescriptiveCBN(y)
 plotCBN(descbn, dev = TRUE)
 ry <- rbn(descbn$BN.fit, n = 4800)
 
 dbn <- buildCBN(data)
-dbn.mle <- buildCBN(data, param.learning.method = "mle")
 
 dbncomplex <- buildCBN(data,
                        structure.learning.algorithm = "mmhc",
@@ -71,8 +68,8 @@ dbncomplex <- buildCBN(data,
 plotCBN(dbn, dev = TRUE)
 plotCBN(dbncomplex$intermediateDBN1, dev = TRUE, nodes = 1)
 plotCBN(dbncomplex, dev = TRUE)
-# exp.name <- "wgIB.G.pdf"
-# dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 30, height = 15)
+# exp.name <- "rel0_1.pdf"
+# dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
 # tx <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "prd")
  ty <- getTemporalIntersection(obs = filterNA(y), prd = filterNA(x), which.return = "obs")
@@ -102,12 +99,23 @@ pye <- convertEvent( py$member_1, threshold.vector = c.thresholds )
 
 downscaleR.BN:::cTableRates(cTable(predicted = pye, real = ty$Data))
 cTable(predicted = pye, real = ty$Data)
-distanceBias(real = ty, prediction = pye)
+distance.bias <- distanceBias(real = ty, prediction = list(pye, sy$member_1, ry),
+                              return.measureMatrix = TRUE,
+                              show.legend = TRUE,
+                              legend = c("real", "predicted", "simulated", "replicated")
+                              )
+dev.new()
+plot(distance.bias$real, distance.bias$predictions[[1]], col = "red", ylim = c(0.1,1),
+     ylab = " ", xlab = "Phi")
+points(distance.bias$real, distance.bias$predictions[[2]], col = "blue")
+points(distance.bias$real, distance.bias$predictions[[3]], col = "green")
+lines(seq(0,1, by = 0.1), seq(0,1, by = 0.1))
+
 
 library(verification)
 pyba <- purgeBinAbsence(probabilities = py$member_1)
 
 dev.new()
 aux <- verify(ty$Data[,1], pyba[,1], frcst.type = "prob", obs.type = "binary",
-              thresholds = seq(0,1, by = 0.05))
+              thresholds = seq(0,1, by = 0.1))
 reliability.plot(aux, titl = "Reliability plot, IB")

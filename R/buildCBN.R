@@ -110,7 +110,7 @@
 #' # Loading predictors
 
 buildCBN <- function(data,
-                     structure.learning.algorithm = "hc",
+                     structure.learning.algorithm = "tabu",
                      structure.learning.args.list = list(),
                      param.learning.method = "bayes",
                      forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,

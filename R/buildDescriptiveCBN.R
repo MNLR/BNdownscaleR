@@ -1,7 +1,7 @@
 #'
 #' @export
 
-buildDescriptiveCBN <- function(y, structure.learning.algorithm =  "hc",
+buildDescriptiveCBN <- function(y, structure.learning.algorithm =  "tabu",
                                 structure.learning.args.list = list(),
                                 compile.junction = TRUE,
                                 param.learning.method = "bayes",

@@ -66,7 +66,7 @@ downscaleBN <- function(DBN, x, output = "probabilities",
 
   if (prediction.type == "simulation"){
     PT <- lapply(PT,
-                 FUN = function(PT_) { return(characterToOperableMatrix(t(PT_)))}
+                 FUN = function(PT_) { return(toOperableMatrix(t(PT_)))}
                 )
 
     return(lapply(PT, FUN = function(PTel, predictands) {
