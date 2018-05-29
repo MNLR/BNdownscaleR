@@ -146,6 +146,7 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
                                       )
                             )
 
+  rownames(series) <- seq(-(epochs-2), n)
   if (!(is.null(initial.date))){
     rownames(series)[1:(nrow(series)-n)] <- as.character(as.POSIXct(initial.date[1:(length(initial.date)-1)],
                                                        format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
@@ -155,7 +156,6 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
                                                                     ) + seq(step.size, by = step.size, length.out = n)
                                                           )
   }
-  else{ rownames(series) <- seq(-(epochs-2), n) }
 
   return(series)
 }
