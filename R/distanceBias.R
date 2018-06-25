@@ -28,8 +28,10 @@ distanceBias <- function(real,  predictions = NULL, mdist = NULL,
     else {
         predictions <- lapply(predictions, FUN = measureMatrix, measure = measure, ... = ...)
     }
-    ylim <- c( min( unlist(c(real, predictions)), na.rm = TRUE ),
-               max( unlist(c(real, predictions)), na.rm = TRUE )
+    aux_ <- unlist(c(real, predictions))
+    aux_[!is.finite(aux_)] <- NA
+    ylim <- c( min( aux_, na.rm = TRUE ),
+               max( aux_, na.rm = TRUE )
     )
   }
   else {ylim = NULL}

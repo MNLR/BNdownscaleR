@@ -1,5 +1,5 @@
 
-buildDynamicCBNnoG <- function(y,
+buildDynamicCBNnoG <- function(y, processed = FALSE,
                                structure.learning.algorithm = "hc",
                                structure.learning.args.list = list(),
                                param.learning.method = "bayes",
@@ -19,6 +19,7 @@ buildDynamicCBNnoG <- function(y,
                                parallelize = FALSE, n.cores= NULL,
                                cluster.type = "FORK"){
 
+
   if (epochs <= 1){
     stop("epochs must be greater or equal than 2.")
   }
@@ -28,16 +29,19 @@ buildDynamicCBNnoG <- function(y,
   }
   steps.left <- 0
 
-  y <- splitSpellsNA(prepare_Dataset_forDescriptiveBN(y))
+  if (!processed){
+    y <- splitSpellsNA(prepare_Dataset_forDescriptiveBN(y))
 
-  print( paste0(paste0("Building Bayesian Network using ",
-                       structure.learning.algorithm) , "..."
-                )
-         )
+    print( paste0(paste0("Building Bayesian Network using ",
+                         structure.learning.algorithm) , "..."
+                  )
+           )
 
-  if (  class(y) != "pp.forDynBN" ) { # is.null(data$data) = TRUE when already processed for Dynamic
-    y <- prepareDataDynamicBN(y, epochs)
+    if (  class(y) != "pp.forDynBN" ) { # is.null(data$data) = TRUE when already processed for Dynamic
+      y <- prepareDataDynamicBN(y, epochs)
+    }
   }
+
   POS <- y$positions
   NX <- y$nx
   NY <- y$ny

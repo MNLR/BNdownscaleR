@@ -4,10 +4,7 @@
 .RDataTmp
 .Ruserdata
 .gitignore
-things.R
 .Rprofile
 data/*
 test*
-main.R
-oceano/*
 .RDataTmp

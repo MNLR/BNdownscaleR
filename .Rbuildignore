@@ -1,11 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-main.R
-things.R
-man/hello.Rd
 exampleplots/*
 test*
-GER.R
-IBN.R
-oceano/*
-shore/*
+example_Germany.R
+main.R

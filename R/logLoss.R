@@ -18,8 +18,8 @@ logLoss <- function( data, st1, st2, remove.na =  TRUE, evidence.nodes = NULL, e
 
   n <- nrow(Data)
 
-  if (!no.inf && n10*n01 == 0) {logl <- Inf}
-  else if (!no.inf && n00*n11 == 0) {logl <- -Inf}
+  if (!no.inf && n10*n01 == 0) {logl <- NA}
+  else if (!no.inf && n00*n11 == 0) {logl <- NA}
   else{ logl <- log(n00*n11/n10*n01) }
   attr(logl, 'cases') <- n
 

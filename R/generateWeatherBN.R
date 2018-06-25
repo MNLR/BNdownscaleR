@@ -13,7 +13,6 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
   NY <- wg$NY
   NX <- wg$NX
 
-
   if (!is.null(x)){
     if (is.list(x)){
       #todo: paralelizar members si hay más de uno

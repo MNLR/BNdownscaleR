@@ -33,10 +33,7 @@ dataGER <- prepare_predictors.forBN(grid = gridGER)
 descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "hc")
 plotCBN(descGER, dev = TRUE, nodes = 1)
 
-dbnGER <- buildCBN(dataGER,
-                  structure.learning.algorithm = "hc", #structure.learning.args.list = list(distance = 2),
-                  param.learning.method = "bayes"
-                  )
+dbn <- buildCBN(dataGER)
 
 dbnGERalt <- buildCBN(dataGER,
                       structure.learning.algorithm = "mmhc", #structure.learning.args.list = list(distance = 2),
