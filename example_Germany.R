@@ -27,13 +27,13 @@ load("data/xx.RData")
 load("data/yy.RData")
 ##
 
-gridGER <- prepare_predictors(x = xx, y = yy)
+gridGER <- prepareData(x = xx, y = yy)
 dataGER <- prepare_predictors.forBN(grid = gridGER)
 
 descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "hc")
 plotCBN(descGER, dev = TRUE, nodes = 1)
 
-dbn <- buildCBN(dataGER)
+dbnGER <- buildCBN(dataGER)
 
 dbnGERalt <- buildCBN(dataGER,
                       structure.learning.algorithm = "mmhc", #structure.learning.args.list = list(distance = 2),
@@ -48,8 +48,7 @@ plotCBN(dbnGER, dev = TRUE)
 
 txx <- getTemporalIntersection(obs = filterNA(yy), prd = filterNA(xx), which.return = "prd")
 tyy <- getTemporalIntersection(obs = filterNA(yy), prd = filterNA(xx), which.return = "obs")
-testGER <- prepare_newdata(newdata = txx,
-                        predictor = gridGER)
+testGER <- prepareNewData(newdata = txx,data.structure = gridGER)
 
 ###
 ### Prediction
