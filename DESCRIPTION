@@ -5,12 +5,12 @@ Depends:
     downscaleR,
     gRain,
     sfsmisc,
-    abind
+    abind,
+    pbapply
 Imports:
     igraph,
     shape,
     parallel,
-    pbapply,
     infotheo,
     verification
 Suggests:
