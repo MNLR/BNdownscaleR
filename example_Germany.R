@@ -5,15 +5,14 @@ library(downscaleR.BN)                             #
 ####################################################
 ####################################################
 
-# library(loadeR)
-# loginUDG('Mitor', '450cacahuetes')
-# dataInventory("http://meteo.unican.es/tds5/dodsC/interim/daily/interim20_daily.ncml")
+library(loadeR)
+loginUDG('Mitor', '450cacahuetes')
+dataInventory("http://meteo.unican.es/tds5/dodsC/interim/daily/interim20_daily.ncml")
 # xx <- loadGridData(dataset = "http://meteo.unican.es/tds5/dodsC/interim/daily/interim20_daily.ncml",
 #                    var = "TP", lonLim = c(4,16), latLim = c(46,58), years = 1979:2008
 #                    )
-# yy <- loadStationData(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip",
-#                      var = "precip", years = 1979:2008
-#                      )
+ dataInventory(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip")
+ eca53Ger <- loadStationData(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip", var = "precip")
 # xx$Data <- xx$Data*1000
 # xx$Data[xx$Data >= 1] <- 1
 # xx$Data[xx$Data < 1] <- 0
@@ -30,10 +29,13 @@ load("data/yy.RData")
 gridGER <- prepareData(x = xx, y = yy)
 dataGER <- prepare_predictors.forBN(grid = gridGER)
 
-descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "hc")
-plotCBN(descGER, dev = TRUE, nodes = 1)
+descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "tabu", structure.learning.args.list = list(tabu = 10^4))
+plotCBN(descGER, dev = TRUE)
+# exp.name <- "descGER_0_1_10_I_tabu4.pdf"
+# dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
-dbnGER <- buildCBN(dataGER)
+
+dbnGER <- buildCBN(dataGER, structure.learning.args.list = list(tabu = 10^4))
 
 dbnGERalt <- buildCBN(dataGER,
                       structure.learning.algorithm = "mmhc", #structure.learning.args.list = list(distance = 2),
@@ -43,7 +45,7 @@ dbnGERalt <- buildCBN(dataGER,
                       )
 
 plotCBN(dbnGER, dev = TRUE)
-# exp.name <- "wgGER.pdf"
+# exp.name <- "phi.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
 txx <- getTemporalIntersection(obs = filterNA(yy), prd = filterNA(xx), which.return = "prd")
@@ -61,7 +63,7 @@ pyy <- downscaleBN(dbnGER, x = testGER,
 ###
 syy <- downscaleBN(dbnGER, x = testGER,
                    output = "event", prediction.type = "simulation",
-                   parallelize = TRUE, n.cores = 3 , cluster.type = "FORK")
+                   parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 
 ###
 ### Generation
@@ -70,13 +72,13 @@ syy <- downscaleBN(dbnGER, x = testGER,
 gyy <- rbn(descGER$BN.fit, n = 10000)
 
 aucGER <- aucStation(downscaled = pyy$member_1, realData = tyy$Data)
-c(max(aucGER), min(aucGER), mean(aucGER))
+aucGER
 
-cthreshold <- findClimatologyThreshold(pyy$member_1, dbnGER$marginals[2 , ])
-pyye <- convertEvent( pyy$member_1, threshold.vector = cthreshold)
+cthreshold <- findClimatologyThreshold(pyy$member_1, dbnGER$marginals)
+pyye <- convertEvent( pyy$member_1, threshold.vector = 0.5)
 table(pyye)
 table(tyy$Data)
-cTableRates(cTable(predicted = pyye, real = tyy$Data ))
+downscaleR.BN:::cTableRates(cTable(predicted = pyye, real = tyy$Data ))
 
 phiGGER <- measureMatrix(dataGER$data[ , dataGER$x.names])
 dGGER <- measureMatrix(list(Data = dataGER$data[ , dataGER$x.names],
@@ -108,17 +110,13 @@ distanceBias(real = tyy,
              legend_ = c("Real", "Predicted", "Simulated", "Generated") , cex = 0.75
             )
 
-#ppyy <- tyy
-#ppyy$Data <- purgeBinAbsence( pyy$member_1 )
-#reliabilityCategories(hindcast = ppyy  , obs = tyy)
-
 
 library(verification)
 pyyba <- purgeBinAbsence(probabilities = pyy$member_1)
 
 dev.new()
 aux <- verify(tyy$Data[,1], pyyba[,1], frcst.type = "prob", obs.type = "binary",
-              thresholds = seq(0,1, by = 0.05))
+              thresholds = seq(0,1, by = 0.1))
 reliability.plot(aux, titl = "Reliability plot, GER")
 # exp.name <- "rpGER.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)

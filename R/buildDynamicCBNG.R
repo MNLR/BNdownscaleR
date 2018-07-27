@@ -26,7 +26,7 @@ buildDynamicCBNG <- function(y, x,
 
   if (class(y) != "pp.forDynBN") {
     if (class(y) != "pp.forBN"){
-      y <- prepare_predictors.forBN(grid = prepare_predictors(x = x,y = y),
+      y <- prepare_predictors.forBN(grid = prepareData(x = x,y = y),
                                     rm.na = TRUE, rm.na.mode = "observations"
       )
     }
