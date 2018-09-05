@@ -239,12 +239,15 @@ buildCBN <- function(data,
 
     if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
 
-    return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
-                 NX = NX, NY = NY,
-                 marginals = marginals_,
-                 structure.learning.algorithm = structure.learning.algorithm,
-                 structure.learning.args.list = structure.learning.args.list,
-                 param.learning.method = param.learning.method)
-          )
+    cbn <-
+      list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
+      NX = NX, NY = NY,
+      marginals = marginals_,
+      structure.learning.algorithm = structure.learning.algorithm,
+      structure.learning.args.list = structure.learning.args.list,
+      param.learning.method = param.learning.method
+      )
+    class(cbn) <- "cbn"
+    return(cbn)
   }
 }

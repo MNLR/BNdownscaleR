@@ -121,3 +121,39 @@ reliability.plot(aux, titl = "Reliability plot, GER")
 # exp.name <- "rpGER.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
+
+#
+##
+### Weather gens
+##
+#
+
+wg <- buildDynamicCBN(y = gridGER$y, structure.learning.algorithm = "tabu",
+                      structure.learning.args.list = list(tabu = 10^2)
+                      )
+dev.new()
+plotCBN(wg, dev = TRUE)
+
+wgG <- buildDynamicCBN(y = yy, x = xx, structure.learning.algorithm = "tabu",
+                       structure.learning.args.list = list(tabu = 10^2)
+                       )
+dev.new()
+plotCBN(wgG, dev = TRUE)
+
+pywg <- downscaleBN(cbn = wg, x = NULL, y = yy)
+pywgG <- downscaleBN(cbn = wgG, x = xx, y = yy)
+
+
+n_ <- 10000
+initial <- as.matrix(wg$training.data[1,1:wg$NY])
+print(initial)
+gen <- generateWeatherBN(wg = wg, n = n_, initial = initial,
+                         initial.date = rownames(wg$training.data)[1], inference.type = "exact"
+)
+
+wgG <- buildDynamicCBN(y = data, structure.learning.algorithm = "tabu",
+                       structure.learning.args.list = list(tabu = 10^4), compile.junction = TRUE
+)
+genG <- generateWeatherBN(wg = wgG, x = grid$x.global,
+                          initial.date = rownames(wgG$training.data)[1], inference.type = "exact")
+

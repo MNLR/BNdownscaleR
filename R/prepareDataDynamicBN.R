@@ -45,7 +45,8 @@ prepareDataDynamicBN <- function(data_, epochs){
       return(paste0(node, paste0(".T", time))) }, node = data_$x.names, time = rep(0, data_$nx) )),
                                      y.names = as.vector(mapply( FUN = function(node, time) {
                                        return(paste0(node, paste0(".T", time)))
-                                     }, node = data_$y.names, time = rep(0, data_$ny)) ))
+                                     }, node = data_$y.names, time = rep(0, data_$ny)) )
+                                    )
                               )
 
     for (epoch in 1:(epochs-1)) {
@@ -72,10 +73,10 @@ prepareDataDynamicBN <- function(data_, epochs){
                                               )
                                             )
     }
-    colnames(dinamic.data) <- mapply( FUN = function(node, time) {
-      return(paste0(node, paste0(".T", time)))
-    }, node = names_, time = layers
-    )
+    colnames(dinamic.data) <- mapply(FUN = function(node, time) {
+                                             return(paste0(node, paste0(".T", time)))
+                                           }, node = names_, time = layers
+                                     )
   }
   else {
     names.distribution <- rep(list(list(y.names = names_)), epochs)

@@ -72,8 +72,11 @@ buildDynamicCBNnoG <- function(y, processed = FALSE,
   }
 
   if (compile.junction){
+    message("Warning: Compiling junction tree for weather generators might be (and usually
+            is) unefficient.")
+    readline(prompt="Press [enter] to continue...")
     junction <- compileJunction(bn.fit)
-  } else { junction <- NULL }
+  } else { junction <- NA }
 
   marginals_ <- marginals( list(BN = bn, NX = NX, junction = junction,
                                 training.data = DATA) )

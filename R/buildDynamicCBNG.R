@@ -28,7 +28,7 @@ buildDynamicCBNG <- function(y, x,
     if (class(y) != "pp.forBN"){
       y <- prepare_predictors.forBN(grid = prepareData(x = x,y = y),
                                     rm.na = TRUE, rm.na.mode = "observations"
-      )
+                                    )
     }
     y <- splitSpellsNA(y)
 
@@ -178,8 +178,11 @@ buildDynamicCBNG <- function(y, x,
   }
   else {
     if (compile.junction){
+      message("Warning: Compiling junction tree for weather generators might be (and usually
+            is) unefficient.")
+      readline(prompt="Press [enter] to continue...")
       junction <- compileJunction(bn.fit)
-    } else { junction <- NULL }
+    } else { junction <- NA }
 
     marginals_ <- marginals( list(BN = bn, NX = NX, junction = junction,
                                   training.data = DATA) )
@@ -194,13 +197,17 @@ buildDynamicCBNG <- function(y, x,
 
     if (!(is.null(distance))) { structure.learning.args.list[["distance"]] <- distance }
 
-    return( list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
-                 dynamic.args.list = dynamic.args.list,
-                 NX = NX, NY = NY, names.distribution = names.distribution,
-                 marginals = marginals_,
-                 structure.learning.algorithm = structure.learning.algorithm,
-                 structure.learning.args.list = structure.learning.args.list,
-                 param.learning.method = param.learning.method)
-    )
+    wgG <-
+      list(BN = bn, training.data = DATA, positions = POS, BN.fit = bn.fit, junction = junction,
+           dynamic.args.list = dynamic.args.list,
+           NX = NX, NY = NY, names.distribution = names.distribution,
+           marginals = marginals_,
+           structure.learning.algorithm = structure.learning.algorithm,
+           structure.learning.args.list = structure.learning.args.list,
+           param.learning.method = param.learning.method
+           )
+    class(wgG) <- "DynamicCBNG"
+
+    return(wgG)
   }
 }

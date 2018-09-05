@@ -38,6 +38,8 @@ generateWeatherBN <- function( wg, initial = NULL, n = 1, x = NULL, inference.ty
   if (is.null(junction) && !(is.null(inference.type))) {
     message("Warning: Compiling junction tree for weather generators might be (and usually
             is) unefficient.")
+    readline(prompt="Press [enter] to continue")
+
     junction <- compileJunction( BN.fit )
   }
 
