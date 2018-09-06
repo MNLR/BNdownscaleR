@@ -14,7 +14,7 @@
 #' @importFrom pbapply pbapply
 #' @export
 
-downscaleBN <- function(cbn, x, y = NULL, output = "probabilities",
+predictBN <- function(cbn, x, y = NULL, output = "probabilities",
                         prediction.type = "exact", event = "1", threshold.vector = NULL,
                         output.attr.evidence = FALSE,
                         cl = NULL, stop.cluster = TRUE, parallelize = FALSE, n.cores = NULL,

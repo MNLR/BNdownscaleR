@@ -55,13 +55,13 @@ testGER <- prepareNewData(newdata = txx,data.structure = gridGER)
 ###
 ### Prediction
 ###
-pyy <- downscaleBN(dbnGER, x = testGER,
+pyy <- predictBN(dbnGER, x = testGER,
                   output = "probabilities", prediction.type = "exact",
                   parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 ###
 ### Simulation:
 ###
-syy <- downscaleBN(dbnGER, x = testGER,
+syy <- predictBN(dbnGER, x = testGER,
                    output = "event", prediction.type = "simulation",
                    parallelize = TRUE, n.cores = 2 , cluster.type = "FORK")
 
@@ -140,8 +140,8 @@ wgG <- buildDynamicCBN(y = yy, x = xx, structure.learning.algorithm = "tabu",
 dev.new()
 plotCBN(wgG, dev = TRUE)
 
-pywg <- downscaleBN(cbn = wg, x = NULL, y = yy)
-pywgG <- downscaleBN(cbn = wgG, x = xx, y = yy)
+pywg <- predictBN(cbn = wg, x = NULL, y = yy)
+pywgG <- predictBN(cbn = wgG, x = xx, y = yy)
 
 
 n_ <- 10000
