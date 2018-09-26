@@ -2,7 +2,16 @@ splitSpellsNA <- function( ppfBNdata ) {
   # expects gaps to be given by row number
 
   data_ <- ppfBNdata$data
-  days <- as.numeric(rownames(data_))
+  consecutive.days <- c(NA,diff(as.Date(ppfBNdata$dates.noNA$start))==1)
+  consecutive.days[1] <- TRUE
+
+  days <- seq(1,length(consecutive.days))
+  gaps <- which(!consecutive.days)
+
+  for (i in 1:length(gaps)){
+    days[gaps[i]:length(days)] <- days[gaps[i]:length(days)] + 1
+  }
+
   spells <- list()
   sp.index <- 1
   i0 <- 1

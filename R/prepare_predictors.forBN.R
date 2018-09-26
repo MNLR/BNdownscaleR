@@ -17,7 +17,8 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
   # rm.na parameter should probably not be set to FALSE
   # rm.na.mode shoud probably not be changed.
 
-  x.positions <- t(expand.grid(attributes(grid)$xyCoords$y, attributes(grid)$xyCoords$x ))[2:1, ]
+  x.positions <- t(expand.grid(attributes(grid)$xyCoords$y,
+                               attributes(grid)$xyCoords$x ))[2:1, ]
   nx <- NCOL(x.positions)
   x.names <- mapply(paste0, array("G", nx), seq(1,nx), SIMPLIFY = TRUE, USE.NAMES = FALSE)
   y.positions <- t(grid$y$xyCoords)
@@ -63,8 +64,17 @@ prepare_predictors.forBN <- function(grid, rm.na = TRUE , rm.na.mode = "observat
   # Makes sure data columns are factors.
   data[] <- lapply( data, factor) # the "[]" keeps the dataframe structure
   col_names <- names(data)
+
+  NA.count <- NAS
+  NAS[ NAS > 0] <- TRUE
+  NAS[ NAS == 0 ] <- FALSE
+
+  dates.noNA <- list(start = grid$y$Dates$start[ !NAS ],
+                     end = grid$y$Dates$end[ !NAS ]
+                     )
   pdata <- list(data = data, positions = positions, x.names = x.names, nx = nx,
-                y.names = y.names, ny = ny, NAS = NAS, dates = grid$y$Dates
+                y.names = y.names, ny = ny, NA.count = NA.count, dates = grid$y$Dates,
+                dates.noNA = dates.noNA
                 )
 
   class(pdata) <- "pp.forBN"
