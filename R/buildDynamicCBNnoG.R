@@ -25,7 +25,40 @@ buildDynamicCBNnoG <- function(y, processed = FALSE,
   }
 
   if (structure.learning.steps != 1){
-    warning("Structure.learning.steps not implemented yet.")
+    print("Building intermediate DAG...")
+    invisible(capture.output(
+    descbn <- buildDescriptiveCBN(y,
+                                  structure.learning.algorithm = structure.learning.algorithm,
+                                  structure.learning.args.list = structure.learning.args.list,
+                                  parallelize = parallelize, cluster.type = cluster.type,
+                                  n.cores = n.cores, compile.junction = FALSE
+                                  )
+    ))
+    whitelist_ <-
+      do.call(what = rbind,
+              lapply(0:(epochs-1), FUN = function(epoch_){
+               return(
+                     apply(descbn$BN$arcs,
+                     MARGIN = 2,
+                     FUN = function(x, epoch_){
+                            return(paste(x,paste0("T", as.character(epoch_)),sep = "."))
+                           }, epoch_ = epoch_
+                     )
+               )
+            }
+            )
+      )
+
+    structure.learning.args.list <-
+      initializeDummyGreylist(slal = structure.learning.args.list2, "whitelist")
+
+    structure.learning.args.list$whitelist <- rbind(structure.learning.args.list$whitelist,
+                                                    whitelist_)
+    if (fix.intermediate) {
+      print("fix.intermediate: not yet.")
+    }
+    print("Done.")
+
   }
   steps.left <- 0
 
