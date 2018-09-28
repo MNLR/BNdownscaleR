@@ -57,8 +57,10 @@ buildDynamicCBNnoG <- function(y, processed = FALSE,
     if (fix.intermediate) {
       print("fix.intermediate: not yet.")
     }
+    if (!is.null(structure.learning.algorithm2))  {
+      structure.learning.algorithm <- structure.learning.algorithm2
+    }
     print("Done.")
-
   }
   steps.left <- 0
 
