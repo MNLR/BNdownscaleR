@@ -12,7 +12,8 @@ dataInventory("http://meteo.unican.es/tds5/dodsC/interim/daily/interim20_daily.n
 #                    var = "TP", lonLim = c(4,16), latLim = c(46,58), years = 1979:2008
 #                    )
  dataInventory(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip")
- eca53Ger <- loadStationData(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip", var = "precip")
+ eca53Ger <- loadStationData(dataset = "data/VALUE_ECA_53_Germany_spatial_v1.zip",
+                             var = "precip")
 # xx$Data <- xx$Data*1000
 # xx$Data[xx$Data >= 1] <- 1
 # xx$Data[xx$Data < 1] <- 0
@@ -29,23 +30,27 @@ load("data/yy.RData")
 gridGER <- prepareData(x = xx, y = yy)
 dataGER <- prepare_predictors.forBN(grid = gridGER)
 
-descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "tabu", structure.learning.args.list = list(tabu = 10^4))
+descGER <- buildDescriptiveCBN(yy, structure.learning.algorithm = "tabu",
+                               structure.learning.args.list = list(tabu = 10^4)
+                               )
 plotCBN(descGER, dev = TRUE)
 # exp.name <- "descGER_0_1_10_I_tabu4.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
 
-dbnGER <- buildCBN(dataGER, structure.learning.args.list = list(tabu = 10^4))
+dbnGER <- buildCBN(dataGER, structure.learning.args.list = list(tabu = 10^3))
 
 dbnGERalt <- buildCBN(dataGER,
-                      structure.learning.algorithm = "mmhc", #structure.learning.args.list = list(distance = 2),
-                      param.learning.method = "bayes", structure.learning.steps = 2,
+                      structure.learning.algorithm = "gs",
+                      structure.learning.args.list = list(alpha = 0.001),
+                      param.learning.method = "bayes", structure.learning.steps = 1,
                       forbid.GG = FALSE,
-                      structure.learning.algorithm2 = "hc"
+                      structure.learning.algorithm2 = "hc",
+                      parallelize = TRUE, n.cores = 2
                       )
 
 plotCBN(dbnGER, dev = TRUE)
-# exp.name <- "phi.pdf"
+# exp.name <- "dbn.pdf"
 # dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
 
 txx <- getTemporalIntersection(obs = filterNA(yy), prd = filterNA(xx), which.return = "prd")
@@ -118,8 +123,8 @@ dev.new()
 aux <- verify(tyy$Data[,1], pyyba[,1], frcst.type = "prob", obs.type = "binary",
               thresholds = seq(0,1, by = 0.1))
 reliability.plot(aux, titl = "Reliability plot, GER")
-# exp.name <- "rpGER.pdf"
-# dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 15, height = 15)
+# exp.name <- "wgG.pdf"
+# dev.print(pdf, file = paste0("exampleplots/", exp.name), width = 30, height = 15)
 
 
 #
@@ -154,6 +159,16 @@ gen <- generateWeatherBN(wg = wg, n = n_, initial = initial,
 wgG <- buildDynamicCBN(y = data, structure.learning.algorithm = "tabu",
                        structure.learning.args.list = list(tabu = 10^4), compile.junction = TRUE
 )
+
 genG <- generateWeatherBN(wg = wgG, x = grid$x.global,
                           initial.date = rownames(wgG$training.data)[1], inference.type = "exact")
+
+wg.2step <- buildDynamicCBN(y = gridGER$y, structure.learning.algorithm = "tabu",
+                      structure.learning.args.list = list(tabu = 10^2, k = 1),
+                      structure.learning.steps = 2,
+                      structure.learning.args.list2 = list(k = 0.5),
+                      fix.intermediate = TRUE
+                      )
+plotCBN(wg.2step, dev = TRUE)
+
 
