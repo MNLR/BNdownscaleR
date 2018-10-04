@@ -5,8 +5,9 @@
 #' @importFrom shape plotellipse
 #' @export
 #'
-plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
-                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15, edges.color = c("gray", "black"),
+plotLatLonDAG <- function(dbn, positions, distance = NULL, nodes = -1, no.colors = FALSE, no.labels = FALSE, vertex.label.dist = 1,
+                          node.size = 4, edge.width = 0.5,  edge.arrow.size = 0.15, mark.edge.strength = FALSE,
+                          edges.color = c("gray", "black"),
                           dev = FALSE, axes = TRUE, xlab = "x", ylab = "y") {
   # Plots the graph of class bn with nodes in positions and shows the nodes dependance distance as a circle, for a given distance d assumed to be euclidean distance.
   #  ---- INPUT:
@@ -16,6 +17,8 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
   # distance          Maximum distance of dependancy. If no distance is given, no circle will be drawn (so nodes argument will be ignored)
   # nodes             Index of nodes whose dependancy is going to be shown, can be a vector for several nodes. By default, nodes = 0 plots circles for all nodes. -1 will plot no circle, still
   #                   plotting nodes in given positions.
+  bn <- dbn$BN
+
   if (dev) {  dev.new()  }
   else { plot.new() }
 
@@ -52,26 +55,37 @@ plotLatLonDAG <- function(bn, positions, distance = NULL, nodes = -1, no.colors 
     cpositions <- as.matrix(positions[ ,nodes] )
   }
 
-  if (!is.null(edges.color)) {
-    Nedges <- nrow(EdgeList)
-    GtoD <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "D", EdgeList[, 2]) )
-    DtoG <- intersect(grep(pattern = "D", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
-    GtoG <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
-    # TXtoTY <- intersect(grep(pattern = "T", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]))
+  if (mark.edge.strength){
+    if (is.null(edges.color)) {
+      edges.color <- c("gray", "black")
+    }
+    valueS <- arc.strength(bn, dbn$training.data)
+    rbPal <- colorRampPalette(colors = edges.color)
+    Col <- rbPal(length(abs(valueS[,3])))[as.numeric(cut( abs(valueS[,3]), breaks = length(valueS[,3])))]
+    edge.color.pattern <- Col
+  }
+  else{
+    if (!is.null(edges.color)) {
+      Nedges <- nrow(EdgeList)
+      GtoD <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "D", EdgeList[, 2]) )
+      DtoG <- intersect(grep(pattern = "D", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
+      GtoG <- intersect(grep(pattern = "G", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]) )
+      # TXtoTY <- intersect(grep(pattern = "T", EdgeList[, 1]), grep(pattern = "G", EdgeList[, 2]))
 
 
-    edge.color.pattern <- rep(edges.color[1], Nedges)
-    if (length(edges.color) == 2) {
-      edge.color.pattern[c(GtoD, DtoG, GtoG)] <- edges.color[2]
-    }
-    else if (length(edges.color) == 3){
-      edge.color.pattern[c(GtoD, DtoG)] <- edges.color[2]
-      edge.color.pattern[c(GtoG)] <- edges.color[3]
-    }
-    else if (length(edges.color) >= 4){
-      edge.color.pattern[GtoD] <- edges.color[2]
-      edge.color.pattern[DtoG] <- edges.color[3]
-      edge.color.pattern[c(GtoG)] <- edges.color[4]
+      edge.color.pattern <- rep(edges.color[1], Nedges)
+      if (length(edges.color) == 2) {
+        edge.color.pattern[c(GtoD, DtoG, GtoG)] <- edges.color[2]
+      }
+      else if (length(edges.color) == 3){
+        edge.color.pattern[c(GtoD, DtoG)] <- edges.color[2]
+        edge.color.pattern[c(GtoG)] <- edges.color[3]
+      }
+      else if (length(edges.color) >= 4){
+        edge.color.pattern[GtoD] <- edges.color[2]
+        edge.color.pattern[DtoG] <- edges.color[3]
+        edge.color.pattern[c(GtoG)] <- edges.color[4]
+      }
     }
   }
 

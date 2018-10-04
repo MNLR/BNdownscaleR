@@ -5,7 +5,7 @@
 
 plotCBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALSE, vertex.label.dist = 0.8,
                     no.colors = NULL, node.size = 3,  edge.width = 0.6, edge.arrow.size = 0.2,
-                    edges.color = c("blue", "red", "yellow"),
+                    edges.color = c("blue", "red", "yellow"), mark.edge.strength = FALSE,
                     break.axis = 1, separation.ratio = 0.1, Nlabels = 4){
 
   if (!(is.null(DBN$dynamic.args.list))){
@@ -33,12 +33,12 @@ plotCBN <- function(DBN, title = NULL, dev = FALSE, nodes = -1, no.labels = FALS
 
   if (is.null(no.colors)) { if (length(nodes) == 1 && nodes == -1) {no.colors <- TRUE} else {no.colors <- FALSE} }
 
-  plotLatLonDAG( bn = DBN$BN, positions = DBN$positions,
+  plotLatLonDAG( dbn = DBN, positions = DBN$positions,
                  distance = DBN$structure.learning.args.list$distance,
                  vertex.label.dist = vertex.label.dist,
                  nodes = nodes, node.size = node.size, no.colors = no.colors,
                  no.labels = no.labels, edge.width = edge.width,
-                 edge.arrow.size = edge.arrow.size,
+                 edge.arrow.size = edge.arrow.size, mark.edge.strength = mark.edge.strength,
                  edges.color = edges.color,
                  dev = dev, xlab = "Longitude", ylab = "Latitude", axes
                  )
