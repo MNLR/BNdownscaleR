@@ -55,14 +55,30 @@ plotLatLonDAG <- function(dbn, positions, distance = NULL, nodes = -1, no.colors
     cpositions <- as.matrix(positions[ ,nodes] )
   }
 
-  if (mark.edge.strength){
+  if (is.numeric(mark.edge.strength) || (mark.edge.strength)){
     if (is.null(edges.color)) {
       edges.color <- c("gray", "black")
     }
     valueS <- arc.strength(bn, dbn$training.data)
     rbPal <- colorRampPalette(colors = edges.color)
-    Col <- rbPal(length(abs(valueS[,3])))[as.numeric(cut( abs(valueS[,3]), breaks = length(valueS[,3])))]
-    edge.color.pattern <- Col
+    colored.edges <- abs(valueS[,3])
+
+    if (is.numeric(mark.edge.strength)){
+      color.positions <-
+      as.numeric(
+        cut(colored.edges,
+          breaks = quantile(colored.edges, seq(0,1, length.out = mark.edge.strength + 2)),
+          include.lowest = TRUE
+          )
+        )
+      color.positions <-
+      floor((256+(floor(256/(length((unique(color.positions)))-1) ) ))/(color.positions)) -
+        floor(256/(length((unique(color.positions)))-1) ) +1
+    }
+    else{
+      color.positions <- as.numeric(cut( colored.edges , breaks = length(colored.edges)))
+    }
+    edge.color.pattern <- rbPal(max(color.positions))[color.positions]
   }
   else{
     if (!is.null(edges.color)) {
