@@ -1,7 +1,7 @@
 
 #' @export
 
-filterData <- function(data, st1, st2, remove.na, evidence.nodes, evidence, silent = FALSE){
+filterData <- function(data, st1, st2, remove.na, evidence.nodes, evidence, silent = TRUE){
   Data <- data$Data
   node.names <- data$Metadata$station_id
 
