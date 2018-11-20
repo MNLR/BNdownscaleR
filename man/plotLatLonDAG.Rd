@@ -10,6 +10,9 @@ plotLatLonDAG(dbn, positions, distance = NULL, nodes = -1,
   mark.edge.strength = FALSE, edges.color = c("gray", "black"),
   dev = FALSE, axes = TRUE, xlab = "x", ylab = "y")
 }
+\description{
+Plot a Graph placing nodes in euclidean coordinates \code{positions}
+}
 \author{
 M.N. Legasa
 }

@@ -23,6 +23,9 @@ CBN or a single dataset for a G dynamic CBN (i.e. dynamic CBN do not accept memb
 \item{prediction.type}{Options are \code{"exact"}, \code{"approximate"} and \code{"simulation"}.
 Exact inference requires a compilable junction.}
 }
+\description{
+Downscale with Bayesian Networks
+}
 \author{
 M.N. Legasa
 }

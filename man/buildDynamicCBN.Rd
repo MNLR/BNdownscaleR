@@ -5,9 +5,10 @@
 \title{Build a dynamic discrete Bayesian Network using climate data.}
 \usage{
 buildDynamicCBN(y, x = NULL, structure.learning.algorithm = "tabu",
-  structure.learning.args.list = list(), param.learning.method = "bayes",
-  epochs = 2, forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
-  force.closest.GD = NULL, closest.GD.direction = NULL, forbid.GD = FALSE,
+  structure.learning.args.list = list(),
+  param.learning.method = "bayes", epochs = 2, forbid.GG = FALSE,
+  forbid.DD = FALSE, forbid.DtoG = FALSE, force.closest.GD = NULL,
+  closest.GD.direction = NULL, forbid.GD = FALSE,
   structure.learning.steps = 1, fix.intermediate = TRUE,
   structure.learning.algorithm2 = NULL,
   structure.learning.args.list2 = list(),
@@ -134,6 +135,9 @@ refer to \code{\link[parallel]{parallel}} package.}
 }
 \value{
 An object of type DBN which contains the learnt Bayesian Network.
+}
+\description{
+Build a dynamic discrete Bayesian Network using climate data.
 }
 \details{
 buildDynamicCBN() can be used with or without a Grid dataset. A Grid dataset may be specified

@@ -10,6 +10,9 @@ parallelHandler(type, n.cores, PSOCK.funcExports.list = list(),
 \arguments{
 \item{type}{Cluster type, either FORK or PSOCK.}
 }
+\description{
+Parallelization Cluster Starter
+}
 \author{
 M.N. Legasa
 }

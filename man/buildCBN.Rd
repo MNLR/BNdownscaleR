@@ -5,9 +5,10 @@
 \title{Build a discrete Bayesian Network using climate data.}
 \usage{
 buildCBN(data, structure.learning.algorithm = "tabu",
-  structure.learning.args.list = list(), param.learning.method = "bayes",
-  forbid.GG = FALSE, forbid.DD = FALSE, forbid.DtoG = FALSE,
-  force.closest.GD = NULL, closest.GD.direction = NULL, forbid.GD = FALSE,
+  structure.learning.args.list = list(),
+  param.learning.method = "bayes", forbid.GG = FALSE,
+  forbid.DD = FALSE, forbid.DtoG = FALSE, force.closest.GD = NULL,
+  closest.GD.direction = NULL, forbid.GD = FALSE,
   structure.learning.steps = 1, fix.intermediate = TRUE,
   structure.learning.algorithm2 = NULL,
   structure.learning.args.list2 = list(), return.intermediate = FALSE,
