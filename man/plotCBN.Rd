@@ -8,7 +8,8 @@ plotCBN(DBN, title = NULL, dev = FALSE, nodes = -1,
   no.labels = FALSE, vertex.label.dist = 0.8, no.colors = NULL,
   node.size = 3, edge.width = 0.6, edge.arrow.size = 0.2,
   edges.color = c("blue", "red", "yellow"), mark.edge.strength = FALSE,
-  break.axis = 1, separation.ratio = 0.1, Nlabels = 4)
+  break.axis = 1, separation.ratio = 0.1, Nlabels = 4,
+  return.plot = TRUE)
 }
 \arguments{
 \item{DBN}{Downscaling Bayesian Network, as returned by build.downscalingBN().}
