@@ -2,8 +2,13 @@
 #' @export
 
 filterData <- function(data, st1, st2, remove.na, evidence.nodes, evidence, silent = TRUE){
-  Data <- data$Data
-  node.names <- data$Metadata$station_id
+  if (is.list(data)){
+    Data <- data$Data
+    node.names <- data$Metadata$station_id
+  } else {
+    Data <- data
+    node.names <- NULL
+  }
 
   if (is.character(evidence.nodes) && is.null(node.names) ){
     stop("data$Metadata$station_id not found. Please provide evidence nodes as number.")
