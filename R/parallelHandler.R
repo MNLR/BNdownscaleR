@@ -13,16 +13,12 @@ parallelHandler <- function(type, n.cores,
     if ( is.null(n.cores) ){
       n.cores <- detectCores()-1
     }
-    print("Starting cluster for parallel computation...")
+    print(paste0(paste0("Starting cluster (", n.cores), " threads) for parallel computation..."))
     cl <- makeCluster( n.cores, type = type )
   }
 
   if (type == "PSOCK") {
     print("Exporting data to PSOCK cluster...")
-    #PSOCK.varExportsNames.list = list()
-    #for ( i in 1:length(PSOCK.varExports.list) ) {
-    #  PSOCK.varExportsNames.list[[i]] <- deparse(quote( PSOCK.varExports.list[[i]] ))
-    #}
     PSOCK.exports <- c(PSOCK.funcExports.list, PSOCK.varExports.list)
     print(PSOCK.exports)
     clusterExport(cl, PSOCK.exports, envir = environment())
