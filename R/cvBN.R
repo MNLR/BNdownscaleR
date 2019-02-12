@@ -36,10 +36,10 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
         xt <- localScaling(xt, base = xT, scale = scale)
         xT <- localScaling(xT, base = xT, scale = scale)
       }
-      grid <- prepare_predictors(x = xT, y = yT, global.vars, PCA, combined.only, local.predictors)
+      grid <- prepareData(x = xT, y = yT, global.vars, PCA, combined.only, local.predictors)
       xT <- prepare_predictors.forBN(grid,
                                      rm.na = TRUE, rm.na.mode = "observations")
-      xt <- prepare_newdata(newdata = xt, predictor = grid)
+      xt <- prepareNewData(newdata = xt, predictor = grid)
       model <- build.downscalingBN(xT, ...)
 
       if (plot.DBN){
