@@ -8,20 +8,25 @@ splitSpellsNA <- function( ppfBNdata ) {
   days <- seq(1,length(consecutive.days))
   gaps <- which(!consecutive.days)
 
-  for (i in 1:length(gaps)){
-    days[gaps[i]:length(days)] <- days[gaps[i]:length(days)] + 1
-  }
-
-  spells <- list()
-  sp.index <- 1
-  i0 <- 1
-  for (i in 1:(length(days)-1)){
-    if ( (days[i]+1) != days[i+1] ){
-      spells[[sp.index]] <- ppfBNdata
-      spells[[sp.index]]$data <- data_[i0:i, , drop = FALSE]
-      i0 <- i+1
-      sp.index <- sp.index + 1
+  if (length(gaps) != 0){
+    for (i in 1:length(gaps)){
+      days[gaps[i]:length(days)] <- days[gaps[i]:length(days)] + 1
     }
+
+    spells <- list()
+    sp.index <- 1
+    i0 <- 1
+    for (i in 1:(length(days)-1)){
+      if ( (days[i]+1) != days[i+1] ){
+        spells[[sp.index]] <- ppfBNdata
+        spells[[sp.index]]$data <- data_[i0:i, , drop = FALSE]
+        i0 <- i+1
+        sp.index <- sp.index + 1
+      }
+    }
+  }
+  else{  # NO GAPS
+    spells <- list(ppfBNdata)
   }
 
   class(spells) <- "splitSpellsNA"

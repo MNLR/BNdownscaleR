@@ -16,6 +16,7 @@ buildDynamicCBNnoG <- function(y, processed = FALSE,
                                forbid.past.DD = FALSE,
                                return.intermediate = FALSE,
                                compile.junction = FALSE,
+                               override.junction = TRUE,
                                parallelize = FALSE, n.cores= NULL,
                                cluster.type = "FORK"){
 
@@ -85,7 +86,7 @@ buildDynamicCBNnoG <- function(y, processed = FALSE,
   if (compile.junction){
     message("Warning: Compiling junction tree for weather generators might be (and usually
             is) unefficient.")
-    readline(prompt="Press [enter] to continue...")
+    if (!override.junction) readline(prompt="Press [enter] to continue...")
     junction <- compileJunction(bn.fit)
   } else { junction <- NA }
 

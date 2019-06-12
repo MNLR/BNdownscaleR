@@ -1,7 +1,7 @@
 #' @export
 
 cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NULL, plot.DBN = TRUE, return.model = FALSE,
-                 event = "1", scale = FALSE, global.vars = NULL, PCA = NULL, combined.only = TRUE, local.predictors = NULL,
+                 event = "1",
                  cl = NULL,
                  ...) {
   preNAy <- length(y$Dates$start)
@@ -32,13 +32,8 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
       xT <- data[[xx]]$train$x ; yT <- data[[xx]]$train$y
       xt <- data[[xx]]$test$x  ; yt <- data[[xx]]$test$y
 
-      if (isTRUE(scale)) {
-        xt <- localScaling(xt, base = xT, scale = scale)
-        xT <- localScaling(xT, base = xT, scale = scale)
-      }
-      grid <- prepareData(x = xT, y = yT, global.vars, PCA, combined.only, local.predictors)
-      xT <- prepare_predictors.forBN(grid,
-                                     rm.na = TRUE, rm.na.mode = "observations")
+      grid <- prepareData(x = xT, y = yT)
+      xT <- prepare_predictors.forBN(grid, rm.na = TRUE, rm.na.mode = "observations")
       xt <- prepareNewData(newdata = xt, predictor = grid)
       model <- build.downscalingBN(xT, ...)
 
@@ -46,7 +41,8 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
         plotDBN(model)
       }
 
-      prob.py <- downscale.BN(DBN = model, x = xt, prediction.type = "probabilities", parallelize = TRUE, cl = cl, cluster.type = "FORK")
+      prob.py <- downscale.BN(DBN = model, x = xt, prediction.type = "probabilities", parallelize = TRUE,
+                              cl = cl, cluster.type = "FORK")
 
       if (is.null(threshold.vector)){ threshold.vector  <- 1 - model$marginals[event, ] }
       event.py <- lapply(prob.py, FUN = is.mostLikely, event = event, threshold.vector =  threshold.vector)
@@ -65,7 +61,9 @@ cvBN <- function(x, y, folds = 4, type = "chronological", threshold.vector = NUL
   } else { modelS <- NULL}
 
   for (i in 1:length(probS[[1]]) ){
-    prob <- lapply(1:length(probS[[1]]), FUN = function(member, probS) { return(lapply(probS, FUN = function(fold){ return(fold[[member]]) })) }, probS = probS)
+    prob <- lapply(1:length(probS[[1]]),
+                   FUN = function(member, probS) {
+                     return(lapply(probS, FUN = function(fold){ return(fold[[member]]) })) }, probS = probS)
     event <- lapply(1:length(evS[[1]]), FUN = function(member, evS) { return(lapply(evS, FUN = function(fold){ return(fold[[member]]) })) }, evS = evS)
   }
 
